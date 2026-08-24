@@ -9,33 +9,36 @@ export default async function MarketplacePage() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/login?next=/marketplace");
+  const myUsernames: string[] = [];
+  const myBadges: string[] = [];
+  let discordId: string | null = null;
+
+  if (user) {
+    const { data: purchased } = await supabase
+      .from("purchased_usernames")
+      .select("username")
+      .eq("user_id", user.id);
+    if (purchased) {
+      myUsernames.push(...purchased.map((p: any) => String(p.username)));
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("owned_badges, discord_id")
+      .eq("id", user.id)
+      .maybeSingle();
+    if (profile) {
+      discordId = profile.discord_id || null;
+      if (Array.isArray(profile.owned_badges)) {
+        myBadges.push(...profile.owned_badges.map(String));
+      }
+    }
   }
-
-  // Get user's purchased usernames
-  const { data: purchased } = await supabase
-    .from("purchased_usernames")
-    .select("username")
-    .eq("user_id", user.id);
-
-  const myUsernames = (purchased || []).map((p: any) => String(p.username));
-
-  // Get user's owned badges and discord_id from profiles
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("owned_badges, discord_id")
-    .eq("id", user.id)
-    .maybeSingle();
-
-  const myBadges = Array.isArray(profile?.owned_badges)
-    ? profile.owned_badges.map(String)
-    : [];
 
   return (
     <MarketplaceClient
-      userId={user.id}
-      discordId={profile?.discord_id || null}
+      userId={user?.id || null}
+      discordId={discordId}
       myUsernames={myUsernames}
       myBadges={myBadges}
       availableBadges={MARKETPLACE_BADGES.map((b) => ({ id: b.id, name: b.name, icon: b.icon }))}

@@ -12,13 +12,13 @@ import BrandMark from "@/components/BrandMark";
 type BadgeItem = { id: string; name: string; icon: string };
 
 export default function MarketplaceClient({
-  userId: _userId,
+  userId,
   discordId,
   myUsernames,
   myBadges,
   availableBadges,
 }: {
-  userId: string;
+  userId: string | null;
   discordId: string | null;
   myUsernames: string[];
   myBadges: string[];
@@ -91,6 +91,10 @@ export default function MarketplaceClient({
   };
 
   const handleBuyUsername = async () => {
+    if (!userId) {
+      router.push("/login?next=/marketplace");
+      return;
+    }
     if (searchStatus !== "available" || !searchName) return;
     setLoading(true);
     setError("");
@@ -109,6 +113,10 @@ export default function MarketplaceClient({
   };
 
   const handleBuyBadge = async (badgeId: string, badgeName: string) => {
+    if (!userId) {
+      router.push("/login?next=/marketplace");
+      return;
+    }
     if (confirm(`Confirm purchase of the "${badgeName}" badge for $${MARKETPLACE_PRICES[badgeId]?.toFixed(2)}?`)) {
       const res = await purchaseBadge(badgeId);
       if (res.error) {
@@ -146,8 +154,8 @@ export default function MarketplaceClient({
     <main className="mp-shell">
       <div className="mp-wrap">
         <header className="mp-head">
-          <button className="btn-ghost" onClick={() => router.push("/dashboard")} style={{ padding: 0, height: "auto" }}>
-            <ArrowLeft size={14} /> Dashboard
+          <button className="btn-ghost" onClick={() => router.push(userId ? "/dashboard" : "/")} style={{ padding: 0, height: "auto" }}>
+            <ArrowLeft size={14} /> {userId ? "Dashboard" : "Home"}
           </button>
           <BrandMark />
         </header>
@@ -251,42 +259,56 @@ export default function MarketplaceClient({
           </div>
 
           <aside className="mp-inv">
-            <h3>Your inventory</h3>
+            {!userId ? (
+              <div style={{ textAlign: "center", padding: "16px 8px" }}>
+                <h3 style={{ marginBottom: 12 }}>Your inventory</h3>
+                <p style={{ fontSize: 13, color: "#71717a", marginBottom: 20, lineHeight: 1.5 }}>
+                  Log in to see your acquired premium handles and profile badges.
+                </p>
+                <button className="btn-primary" onClick={() => router.push("/login?next=/marketplace")} style={{ width: "100%", height: 38 }}>
+                  Log in to purchase
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3>Your inventory</h3>
 
-            <div style={{ marginBottom: 28 }}>
-              <h4>Handles ({myUsernames.length})</h4>
-              {myUsernames.length === 0 ? (
-                <div className="mp-empty">No premium handles yet.</div>
-              ) : (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {myUsernames.map((name) => (
-                    <div key={name} className="mp-item" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
-                      <span>@{name}</span>
-                      <span style={{ fontSize: 11, color: "#10b981" }}>Active</span>
+                <div style={{ marginBottom: 28 }}>
+                  <h4>Handles ({myUsernames.length})</h4>
+                  {myUsernames.length === 0 ? (
+                    <div className="mp-empty">No premium handles yet.</div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {myUsernames.map((name) => (
+                        <div key={name} className="mp-item" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                          <span>@{name}</span>
+                          <span style={{ fontSize: 11, color: "#10b981" }}>Active</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
 
-            <div>
-              <h4>Badges ({myBadges.length})</h4>
-              {myBadges.length === 0 ? (
-                <div className="mp-empty">No badges purchased yet.</div>
-              ) : (
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                  {myBadges.map((badgeId) => {
-                    const badge = availableBadges.find((b) => b.id === badgeId);
-                    return (
-                      <div key={badgeId} className="mp-item">
-                        <BadgeIcon badge={badge || { id: badgeId, name: badgeId, icon: "⭐" }} monochrome={false} size={16} />
-                        <span style={{ fontWeight: 500 }}>{badge?.name || badgeId}</span>
-                      </div>
-                    );
-                  })}
+                <div>
+                  <h4>Badges ({myBadges.length})</h4>
+                  {myBadges.length === 0 ? (
+                    <div className="mp-empty">No badges purchased yet.</div>
+                  ) : (
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      {myBadges.map((badgeId) => {
+                        const badge = availableBadges.find((b) => b.id === badgeId);
+                        return (
+                          <div key={badgeId} className="mp-item">
+                            <BadgeIcon badge={badge || { id: badgeId, name: badgeId, icon: "⭐" }} monochrome={false} size={16} />
+                            <span style={{ fontWeight: 500 }}>{badge?.name || badgeId}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </aside>
         </div>
       </div>

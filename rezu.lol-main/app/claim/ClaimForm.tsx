@@ -88,7 +88,15 @@ export default function ClaimForm({ userId, suggested }: { userId: string; sugge
             <div className="auth-hint" style={{ color: status === "free" ? "#10b981" : "#ef4444" }}>
               {status === "free" && "Available"}
               {status === "taken" && "Already claimed"}
-              {status === "premium_locked" && "Premium handle — acquire it in the Marketplace first"}
+              {status === "premium_locked" && (
+                <>
+                  Premium handle — acquire it in the{" "}
+                  <Link href="/marketplace" style={{ textDecoration: "underline", color: "inherit", fontWeight: 500 }}>
+                    Marketplace
+                  </Link>{" "}
+                  first
+                </>
+              )}
               {status === "invalid" && "1–20 lowercase letters, numbers, or _"}
             </div>
           </div>
