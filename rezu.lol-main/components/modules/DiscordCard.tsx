@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, Gamepad2, Headphones, MessageCircle, Music, Radio, WifiOff } from "lucide-react";
-import { DISCORD_INVITE_URL, type Profile } from "@/lib/constants";
+import { DISCORD_INVITE_URL, DEFAULT_ACCENT, type Profile } from "@/lib/constants";
 import { card } from "./style";
 
 type BotPresence = {
@@ -45,7 +45,7 @@ function activityText(data?: BotPresence) {
 }
 
 export default function DiscordCard({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   const invite = DISCORD_INVITE_URL;
   const [data, setData] = useState<BotPresence | null>(null);
   const [loading, setLoading] = useState(false);

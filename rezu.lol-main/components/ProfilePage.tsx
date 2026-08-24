@@ -5,10 +5,10 @@ import { Volume2, VolumeX } from "lucide-react";
 import ProfileCard from "./ProfileCard";
 import ScrollProfile from "./ScrollProfile";
 import Effects from "./Effects";
-import type { Profile } from "@/lib/constants";
+import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
 
 export default function ProfilePage({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   const tracks = useMemo(() => {
     const list = Array.isArray(profile.audio_tracks) ? profile.audio_tracks.filter((t) => /^https?:\/\//.test(t.url || "")) : [];
     if (list.length) return list.slice(0, 3);

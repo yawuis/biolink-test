@@ -5,7 +5,7 @@ import { ChevronDown, Eye, MapPin } from "lucide-react";
 import { PLATFORMS } from "./platforms";
 import BrandIcon from "./BrandIcon";
 import BadgeIcon from "./BadgeIcon";
-import { BACKGROUNDS, MODULE_META, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile } from "@/lib/constants";
+import { BACKGROUNDS, MODULE_META, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile, DEFAULT_ACCENT } from "@/lib/constants";
 import About from "./modules/About";
 import DiscordCard from "./modules/DiscordCard";
 import GithubCard from "./modules/GithubCard";
@@ -95,7 +95,7 @@ function isVideoBackground(url?: string) {
 }
 
 export default function ScrollProfile({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   const text = profile.text_color || "#ffffff";
   const badgeColor = profile.icon_color || "#ffffff";
   const badgeFilter = profile.monochrome_icons ? badgeImageTintFilter(badgeColor) : "none";
@@ -324,7 +324,7 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
 
           <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 16, color: "#b7b7c6", fontSize: 12, flexWrap: "wrap" }}>
             {!profile.hide_views && <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Eye size={14} /> {(profile.views || 0).toLocaleString()}</span>}
-            {!profile.hide_likes && <ProfileLikeButton username={profile.username} initialLikes={profile.like_count || 0} accent={profile.accent || "#e11d2f"} />}
+            {!profile.hide_likes && <ProfileLikeButton username={profile.username} initialLikes={profile.like_count || 0} accent={profile.accent || DEFAULT_ACCENT} />}
             {!profile.hide_join_date && joined && <span>Joined {joined}</span>}
           </div>
         </div>

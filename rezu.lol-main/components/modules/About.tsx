@@ -1,9 +1,9 @@
 "use client";
 
-import type { Profile } from "@/lib/constants";
+import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
 
 export default function About({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   return (
     <div style={{ width: "100%", maxWidth: 520, textAlign: "left" }}>
       {profile.bio && (

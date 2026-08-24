@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Clock as ClockIcon } from "lucide-react";
-import type { Profile } from "@/lib/constants";
+import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
 import { card } from "./style";
 
 export default function Clock({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState<Date>(new Date());
   const [tz, setTz] = useState("Local time");

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Music, ExternalLink } from "lucide-react";
-import type { Profile } from "@/lib/constants";
+import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
 import { card } from "./style";
 
 type SpotifyEmbed = { title?: string; thumbnail_url?: string; provider_name?: string };
@@ -19,7 +19,7 @@ function trackId(url: string) {
 }
 
 export default function SpotifyCard({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   const url = cleanUrl(profile.spotify_url);
   const [embed, setEmbed] = useState<SpotifyEmbed | null>(null);
   const [failed, setFailed] = useState(false);

@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 
+import { DEFAULT_ACCENT } from "@/lib/constants";
+
 export default function ProfileLikeButton({
   username,
   initialLikes = 0,
-  accent = "#e11d2f",
+  accent = DEFAULT_ACCENT,
 }: {
   username: string;
   initialLikes?: number;

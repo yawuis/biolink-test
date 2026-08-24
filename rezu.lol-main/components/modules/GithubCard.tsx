@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Github } from "lucide-react";
-import type { Profile } from "@/lib/constants";
+import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
 import { card } from "./style";
 
 type GH = { login: string; name?: string; avatar_url: string; public_repos: number; followers: number; html_url: string };
 
 export default function GithubCard({ profile }: { profile: Profile }) {
-  const accent = profile.accent || "#e11d2f";
+  const accent = profile.accent || DEFAULT_ACCENT;
   const [gh, setGh] = useState<GH | null>(null);
   const [error, setError] = useState(false);
 
