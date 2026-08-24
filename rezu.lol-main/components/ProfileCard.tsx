@@ -327,7 +327,7 @@ function Background({ profile }: { profile: Profile }) {
                 ? "rgba(0,0,0,.62)"
                 : "linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.58))"
             : profile.profile_gradient
-              ? `radial-gradient(circle at 50% 20%, ${accent}55, transparent 48%), linear-gradient(180deg, ${profile.background_color || "#050505"}, #000)`
+              ? `radial-gradient(circle at 50% 20%, ${accent}22, transparent 60%), linear-gradient(180deg, #0f1318, #09090b)`
               : fallbackBg,
           animation: profile.effect === "glow" ? "glow 4s ease-in-out infinite" : "none",
         }}
@@ -439,7 +439,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
         padding: 28,
         borderRadius: "inherit",
         overflow: "hidden",
-        background: profile.background_color || "#09090b",
+        background: BACKGROUNDS[profile.bg] || "#09090b",
         fontFamily: fontFamily(profile.font),
       }}
     >
