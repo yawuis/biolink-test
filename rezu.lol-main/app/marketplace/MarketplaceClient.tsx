@@ -6,6 +6,7 @@ import { Check, X, Loader2, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isPremiumUsername, MARKETPLACE_PRICES, DISCORD_ROLE_BADGES } from "@/lib/constants";
 import { purchaseUsername, purchaseBadge } from "./actions";
+import BadgeIcon from "@/components/BadgeIcon";
 
 type BadgeItem = { id: string; name: string; icon: string };
 
@@ -306,7 +307,7 @@ export default function MarketplaceClient({
                     >
                       <div>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                          <span style={{ fontSize: "32px", lineHeight: 1 }}>{badge.icon}</span>
+                          <BadgeIcon badge={badge} monochrome={false} size={32} />
                           <span style={{ 
                             fontSize: "11px", 
                             color: owned ? "#10b981" : "#a1a1aa", 
@@ -449,7 +450,7 @@ export default function MarketplaceClient({
                             color: "#e4e4e7"
                           }}
                         >
-                          <span style={{ fontSize: "16px", lineHeight: 1 }}>{badge?.icon || "⭐"}</span>
+                          <BadgeIcon badge={badge || { id: badgeId, name: badgeId, icon: "⭐" }} monochrome={false} size={16} />
                           <span style={{ fontWeight: 500 }}>{badge?.name || badgeId}</span>
                         </div>
                       );

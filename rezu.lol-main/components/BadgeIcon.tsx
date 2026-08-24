@@ -72,7 +72,10 @@ export default function BadgeIcon({
         />
       );
     }
-    return <span style={{ fontSize: size, lineHeight: 1 }}>{badge.icon || "⭐"}</span>;
+    const BuiltinIcon = ICONS[badge.id];
+    if (!BuiltinIcon) {
+      return <span style={{ fontSize: size, lineHeight: 1 }}>{badge.icon || "⭐"}</span>;
+    }
   }
 
   const Icon = ICONS[badge.id] || BadgeCheck;
