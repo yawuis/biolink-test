@@ -30,6 +30,7 @@ import {
   User,
   Wand2,
   X,
+  ShoppingBag,
 } from "lucide-react";
 import ProfileCard from "@/components/ProfileCard";
 import BrandIcon from "@/components/BrandIcon";
@@ -200,6 +201,9 @@ export default function DashboardEditor({ initial, isOwner = false }: { initial:
           <a className="ghostBtn" href={`/${p.username}`} target="_blank" rel="noreferrer">
             <ExternalLink size={15} /> Open page
           </a>
+          <a className="ghostBtn" href="/marketplace" style={{ color: "#e11d2e", fontWeight: 600 }}>
+            <ShoppingBag size={15} /> Marketplace
+          </a>
           <button className="ghostBtn" onClick={() => navigator.clipboard?.writeText(publicUrl)}>
             <Share2 size={15} /> Copy link
           </button>
@@ -219,6 +223,9 @@ export default function DashboardEditor({ initial, isOwner = false }: { initial:
             <span className="status2">{status || "Changes stay local until you save."}</span>
             <a className="ghostBtn" href={`/${p.username}`} target="_blank" rel="noreferrer">
               <Eye size={15} /> Preview
+            </a>
+            <a className="ghostBtn" href="/marketplace" style={{ color: "#e11d2e", fontWeight: 600 }}>
+              <ShoppingBag size={15} /> Marketplace
             </a>
             <button className="primaryBtn" onClick={save}>
               <Save size={15} /> Save changes

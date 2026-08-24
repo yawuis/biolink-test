@@ -53,13 +53,26 @@ export default async function Home() {
       </h1>
 
       <p style={{ color: "#9a9aaa", fontSize: 17, maxWidth: 440, margin: "0 0 34px" }}>
-        {user ? "You are already signed in. Jump straight back into your dashboard." : "Claim your name before someone else does. Each name can only belong to one person."}
+        {user ? (
+          "You are already signed in. Jump straight back into your dashboard."
+        ) : (
+          <>
+            Claim your name before someone else does. Each name can only belong to one person. Check out the{" "}
+            <Link href="/marketplace" style={{ color: "#e11d2e", fontWeight: 600 }}>
+              Marketplace
+            </Link>{" "}
+            for premium handles.
+          </>
+        )}
       </p>
 
       {user ? (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
           <Link href={username ? "/dashboard" : "/claim"} className="btn" style={{ background: "#e11d2f", color: "#fff", textDecoration: "none" }}>
             Open dashboard
+          </Link>
+          <Link href="/marketplace" className="btn" style={{ background: "#15151b", color: "#fff", border: "1px solid #24242c", textDecoration: "none" }}>
+            Marketplace
           </Link>
           {username && (
             <Link href={`/${username}`} className="btn" style={{ background: "#15151b", color: "#fff", border: "1px solid #24242c", textDecoration: "none" }}>
