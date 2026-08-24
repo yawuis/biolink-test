@@ -234,11 +234,24 @@ export function badgesFromDiscordRoleIds(roleIds: string[]): BadgeItem[] {
 }
 
 export const PREMIUM_3_LETTER_USERNAMES = new Set([
-  "dev", "vip", "ceo", "lol", "app", "bot", "btc", "eth", "sol", "nft", 
-  "pro", "fun", "wtf", "wow", "god", "sad", "bad", "run", "fly", "win", 
-  "out", "new", "old", "use", "get", "set", "key", "api", "web", "dns", 
-  "git", "hub", "sql", "pay", "usd", "ltd", "gem", "one", "yes", "top",
-  "uzi"
+  "ace", "add", "afk", "age", "aim", "air", "all", "api", "app", "art",
+  "bad", "bag", "bed", "bee", "ben", "bio", "blk", "blu", "bob", "bot",
+  "box", "btc", "bug", "bus", "buy", "cab", "cap", "car", "cat", "ceo",
+  "cmd", "com", "cow", "cry", "cup", "dan", "day", "den", "dev", "die",
+  "dig", "dns", "dog", "dry", "eat", "eli", "end", "era", "eth", "exe",
+  "fee", "fit", "fly", "fox", "fps", "ftp", "fun", "gem", "get", "ggs",
+  "git", "god", "gun", "guy", "hat", "hax", "how", "hub", "ian", "ice",
+  "ink", "ios", "its", "jay", "jax", "jet", "job", "joe", "jon", "kai",
+  "ken", "key", "lag", "law", "lee", "leo", "lfg", "lft", "lit", "lnk",
+  "log", "lol", "ltd", "mac", "mad", "map", "max", "mod", "neo", "net",
+  "new", "nft", "nil", "now", "off", "old", "one", "ops", "org", "out",
+  "pay", "pen", "pig", "pog", "pro", "pub", "ram", "raw", "ray", "red",
+  "rez", "rip", "rob", "ron", "roy", "run", "sad", "sam", "sea", "sel",
+  "set", "sex", "six", "sky", "sob", "sol", "sql", "ssh", "ssl", "sub",
+  "sum", "sun", "sys", "tax", "ted", "ten", "tim", "tom", "top", "tox",
+  "try", "two", "url", "usd", "use", "uzi", "val", "van", "vip", "war",
+  "web", "wet", "wht", "who", "why", "win", "wow", "wtf", "yes", "you",
+  "zac", "zen", "zip"
 ]);
 
 export function isPremiumUsername(username: string): boolean {
