@@ -1,8 +1,8 @@
 export const BACKGROUNDS: Record<string, string> = {
   midnight: "#09090b",
-  ember: "radial-gradient(circle at 80% 10%, #17151b, #09090b 70%)",
-  abyss: "radial-gradient(circle at 50% 0%, #0f172a, #09090b 70%)",
-  void: "radial-gradient(circle at 50% 50%, #141416, #09090b 80%)",
+  ember: "#09090b",
+  abyss: "#09090b",
+  void: "#09090b",
 };
 
 export const EFFECTS = ["none", "particles", "glow", "snow", "rain"] as const;
@@ -153,12 +153,12 @@ export const DEFAULT_PROFILE_EXTRAS: Partial<Profile> = {
   text_color: "#ffffff",
   icon_color: "#ffffff",
   link_color: "#ffffff",
-  background_color: "#000000",
+  background_color: "#09090b",
   primary_color: "#000000",
   secondary_color: "#ffffff",
   background_effect_color: "#ffffff",
-  profile_opacity: 70,
-  profile_blur: 22,
+  profile_opacity: 100,
+  profile_blur: 0,
   avatar_shape: "circle",
   location: "",
   pronouns: "",
@@ -172,7 +172,7 @@ export const DEFAULT_PROFILE_EXTRAS: Partial<Profile> = {
   use_discord_avatar: false,
   swap_box_colors: true,
   discord_avatar_decoration: false,
-  badges_glow: true,
+  badges_glow: false,
   hide_views: false,
   hide_likes: false,
   hide_join_date: false,

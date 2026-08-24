@@ -11,7 +11,7 @@ export default function NotFound() {
         justifyContent: "center",
         textAlign: "center",
         padding: 24,
-        background: "#050507",
+        background: "#09090b",
       }}
     >
       <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em", marginBottom: "32px" }}>

@@ -112,15 +112,25 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
     playTrack(next, true);
   };
 
+  const isScroll = profile.layout === "scroll";
+
   return (
-    <main style={{ minHeight: "100vh", position: "relative" }}>
+    <main
+      style={{
+        minHeight: "100vh",
+        position: "relative",
+        background: "#09090b",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       {customCursorUrl && (
         <style>{`html, body, body * { cursor: url("${customCursorUrl}") 0 0, auto !important; }`}</style>
       )}
       {entered && <Effects accent={accent} effect={profile.effect} cursor={profile.cursor_effect} />}
 
-      <div style={{ position: "relative", zIndex: 0, minHeight: "100vh" }}>
-        {profile.layout === "scroll" ? (
+      <div style={{ position: "relative", zIndex: 0, flex: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        {isScroll ? (
           <ScrollProfile profile={profile} />
         ) : (
           <ProfileCard profile={profile} />
@@ -202,14 +212,14 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
         >
           <span
             style={{
-              fontSize: 22,
-              letterSpacing: "0.18em",
+              fontSize: 18,
+              letterSpacing: "0.16em",
               textTransform: "lowercase",
-              padding: "14px 26px",
-              borderRadius: 14,
-              border: `1px solid ${accent}55`,
-              boxShadow: `0 0 30px -8px ${accent}`,
-              animation: "glow 2.6s ease-in-out infinite",
+              padding: "12px 22px",
+              borderRadius: 8,
+              border: "1px solid #27272a",
+              background: "#141416",
+              color: "#f4f4f5",
             }}
           >
             {enterText}

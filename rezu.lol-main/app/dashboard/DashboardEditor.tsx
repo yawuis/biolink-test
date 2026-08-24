@@ -120,7 +120,127 @@ export default function DashboardEditor({ initial, isOwner = false }: { initial:
   const profileAccent = p.accent || "#55acee";
   const publicUrl = typeof window === "undefined" ? `/${p.username}` : `${getBrowserPublicBaseUrl()}/${p.username}`;
   const active = NAV.find((item) => item.tab === tab) || NAV[0];
-  const filteredNav = NAV.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()));
+type SearchResult = { label: string; sub: string; tab: Tab; anchor: string };
+
+const SEARCH_INDEX: SearchResult[] = [
+  // Overview
+  { label: "Profile checklist", sub: "Completion overview", tab: "overview", anchor: "s-checklist" },
+  { label: "Live preview", sub: "See your profile instantly", tab: "overview", anchor: "s-preview-ov" },
+  { label: "Quick edit", sub: "Display name, bio, accent", tab: "overview", anchor: "s-quickedit" },
+  { label: "Bio / description", sub: "Profile bio text", tab: "overview", anchor: "s-quickedit" },
+  { label: "Display name", sub: "Name shown on your profile", tab: "overview", anchor: "s-quickedit" },
+  { label: "Location", sub: "Shown on your profile", tab: "overview", anchor: "s-quickedit" },
+  { label: "Pronouns", sub: "Shown under your name", tab: "overview", anchor: "s-quickedit" },
+  { label: "Profile accent", sub: "Color used for accents and glow", tab: "overview", anchor: "s-quickedit" },
+  // Customize — Assets
+  { label: "Profile avatar", sub: "Upload your profile picture", tab: "customize", anchor: "s-assets" },
+  { label: "Avatar upload", sub: "Upload your profile picture", tab: "customize", anchor: "s-assets" },
+  { label: "Background image", sub: "Upload a background media", tab: "customize", anchor: "s-assets" },
+  { label: "Background video", sub: "Upload a background media", tab: "customize", anchor: "s-assets" },
+  { label: "Background upload", sub: "Upload a background media", tab: "customize", anchor: "s-assets" },
+  { label: "Audio / music", sub: "Upload profile audio tracks", tab: "customize", anchor: "s-assets" },
+  { label: "Spotify cover", sub: "Spotify card cover art", tab: "customize", anchor: "s-assets" },
+  { label: "Custom cursor", sub: "PNG cursor file upload", tab: "customize", anchor: "s-assets" },
+  // Customize — General
+  { label: "Profile opacity", sub: "How transparent the card is", tab: "customize", anchor: "s-general" },
+  { label: "Profile blur", sub: "Blur amount on profile card", tab: "customize", anchor: "s-general" },
+  { label: "Background effect", sub: "Blurred / darken / none", tab: "customize", anchor: "s-general" },
+  { label: "Username effect", sub: "Glow, sparkle, typewriter", tab: "customize", anchor: "s-general" },
+  { label: "Layout", sub: "Classic, portfolio, scroll etc.", tab: "customize", anchor: "s-general" },
+  { label: "Avatar shape", sub: "Circle, rounded, hexagon", tab: "customize", anchor: "s-general" },
+  { label: "Discord presence", sub: "Show Discord status card", tab: "customize", anchor: "s-general" },
+  // Customize — Music & Cards
+  { label: "GitHub username", sub: "GitHub presence card", tab: "customize", anchor: "s-music" },
+  { label: "Spotify track link", sub: "Spotify integration", tab: "customize", anchor: "s-music" },
+  { label: "Spotify display title", sub: "Spotify card label", tab: "customize", anchor: "s-music" },
+  { label: "Page enter text", sub: "Click-to-enter overlay text", tab: "customize", anchor: "s-music" },
+  // Customize — Colors
+  { label: "Accent color", sub: "Profile accent and glow color", tab: "customize", anchor: "s-colors" },
+  { label: "Text color", sub: "Main profile text color", tab: "customize", anchor: "s-colors" },
+  { label: "Background color", sub: "Card fallback color", tab: "customize", anchor: "s-colors" },
+  { label: "Badge color", sub: "Badge tint when monochrome on", tab: "customize", anchor: "s-colors" },
+  { label: "Links color", sub: "Social and link icon color", tab: "customize", anchor: "s-colors" },
+  { label: "Background effect color", sub: "Color for background effects", tab: "customize", anchor: "s-colors" },
+  { label: "Profile gradient", sub: "Toggle gradient background", tab: "customize", anchor: "s-colors" },
+  // Customize — Other
+  { label: "Monochrome icons", sub: "Toggle monochrome badge icons", tab: "customize", anchor: "s-other" },
+  { label: "Animated title", sub: "Toggle page title animation", tab: "customize", anchor: "s-other" },
+  { label: "Badge glow", sub: "Enable badge glow effect", tab: "customize", anchor: "s-other" },
+  { label: "Cursor effect", sub: "Trail, dot, or particle cursor", tab: "customize", anchor: "s-other" },
+  { label: "Font", sub: "Profile font family", tab: "customize", anchor: "s-other" },
+  { label: "Tags", sub: "Profile skill tags", tab: "customize", anchor: "s-tags" },
+  // Links
+  { label: "Quick add links", sub: "Add Discord, GitHub, etc.", tab: "links", anchor: "s-quickadd" },
+  { label: "Link list", sub: "Manage all your links", tab: "links", anchor: "s-linklist" },
+  { label: "Custom URL", sub: "Add a custom link", tab: "links", anchor: "s-quickadd" },
+  { label: "Social links", sub: "Manage socials", tab: "links", anchor: "s-linklist" },
+  // Layout
+  { label: "Layout type", sub: "Classic, portfolio, scroll etc.", tab: "layout", anchor: "s-layouttype" },
+  { label: "Module visibility", sub: "About, Discord, Spotify etc.", tab: "layout", anchor: "s-modules" },
+  { label: "About module", sub: "Show/hide about section", tab: "layout", anchor: "s-modules" },
+  { label: "Spotify module", sub: "Show/hide Spotify card", tab: "layout", anchor: "s-modules" },
+  { label: "Clock module", sub: "Show/hide local time", tab: "layout", anchor: "s-modules" },
+  // Metadata
+  { label: "Website title", sub: "SEO page title", tab: "metadata", anchor: "s-metadata" },
+  { label: "Website description", sub: "SEO meta description", tab: "metadata", anchor: "s-metadata" },
+  { label: "Website image", sub: "Open Graph / Twitter card image", tab: "metadata", anchor: "s-metadata" },
+  { label: "Custom favicon", sub: "Browser tab icon", tab: "metadata", anchor: "s-metadata" },
+  { label: "Search indexing", sub: "Allow/block search engines", tab: "metadata", anchor: "s-metadata" },
+  // Settings
+  { label: "Username", sub: "Change your unique username", tab: "settings", anchor: "s-username" },
+  { label: "Alias", sub: "Secondary profile URL", tab: "settings", anchor: "s-alias" },
+  { label: "Linked Discord", sub: "Connect Discord account", tab: "settings", anchor: "s-discord-link" },
+  { label: "Privacy", sub: "Hide views, likes, join date", tab: "settings", anchor: "s-privacy" },
+  { label: "Hide views", sub: "Remove view count from profile", tab: "settings", anchor: "s-privacy" },
+  { label: "Hide likes", sub: "Remove like count from profile", tab: "settings", anchor: "s-privacy" },
+  { label: "Hide join date", sub: "Remove join date from profile", tab: "settings", anchor: "s-privacy" },
+  // Analytics
+  { label: "Views trend", sub: "Profile view history", tab: "analytics", anchor: "s-analytics" },
+  // Badges
+  { label: "Badges", sub: "Discord role badges", tab: "badges", anchor: "s-badges" },
+  { label: "Role badges", sub: "Earned via Discord roles", tab: "badges", anchor: "s-badges" },
+  // Templates
+  { label: "Templates", sub: "Save and apply profile templates", tab: "templates", anchor: "s-templates" },
+];
+
+  const [searchFocused, setSearchFocused] = useState(false);
+
+  const searchResults = useMemo(() => {
+    if (!query.trim()) return [];
+    const q = query.toLowerCase();
+    const navMatches = NAV.filter((item) => item.label.toLowerCase().includes(q)).map((item) => ({
+      label: item.label,
+      sub: item.desc,
+      tab: item.tab,
+      anchor: "",
+    }));
+    const indexMatches = SEARCH_INDEX.filter((item) =>
+      item.label.toLowerCase().includes(q) || item.sub.toLowerCase().includes(q)
+    );
+    const seen = new Set<string>();
+    return [...navMatches, ...indexMatches].filter((r) => {
+      const key = `${r.tab}:${r.anchor}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 8);
+  }, [query]);
+
+  const filteredNav = query.trim()
+    ? NAV.filter((item) => item.label.toLowerCase().includes(query.toLowerCase()))
+    : NAV;
+
+  const goToResult = (result: SearchResult) => {
+    setTab(result.tab);
+    setQuery("");
+    setSearchFocused(false);
+    if (result.anchor) {
+      setTimeout(() => {
+        const el = document.getElementById(result.anchor);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 80);
+    }
+  };
 
   const setBadgeColor = (value: string) => {
     if (!p.monochrome_icons) {
@@ -173,9 +293,25 @@ export default function DashboardEditor({ initial, isOwner = false }: { initial:
           <span>{SITE_NAME}</span>
         </div>
 
-        <div className="search2">
+        <div className="search2" style={{ position: "relative" }}>
           <Search size={15} />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search pages" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+            placeholder="Search settings..."
+          />
+          {searchFocused && searchResults.length > 0 && (
+            <div className="searchDrop2">
+              {searchResults.map((r, i) => (
+                <button key={i} className="searchDropItem2" onMouseDown={() => goToResult(r)}>
+                  <span className="searchDropLabel2">{r.label}</span>
+                  <span className="searchDropSub2">{r.sub}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <nav className="nav2">
@@ -271,7 +407,7 @@ function Overview({ p, update, setTab }: { p: Profile; update: (patch: Partial<P
       </div>
 
       <div className="split2 previewSplit2">
-        <section className="card2">
+        <section id="s-checklist" className="card2">
           <div className="cardHead2">
             <h2>Profile checklist</h2>
             <p>Cleaner view of what is finished and what is missing.</p>
@@ -296,7 +432,7 @@ function Overview({ p, update, setTab }: { p: Profile; update: (patch: Partial<P
           )}
         </section>
 
-        <section className="card2 previewCard2">
+        <section id="s-preview-ov" className="card2 previewCard2">
           <div className="cardHead2"><h2>Live preview</h2><p>This updates as you edit.</p></div>
           <div className="previewBox2">
             <ProfileCard profile={p} />
@@ -304,7 +440,7 @@ function Overview({ p, update, setTab }: { p: Profile; update: (patch: Partial<P
         </section>
       </div>
 
-      <section className="card2">
+      <section id="s-quickedit" className="card2">
         <div className="cardHead2"><h2>Quick edit</h2><p>Username is locked to Settings so you do not accidentally take or lose a unique name.</p></div>
         <div className="formGrid2">
           <Field label="Display name" value={p.display_name || ""} onChange={(v) => update({ display_name: v })} />
@@ -354,7 +490,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
   return (
     <div className="customizeShell2">
       <div className="customizeControls2">
-        <section className="gunSection2">
+        <section id="s-assets" className="gunSection2">
           <div className="gunSectionHead2">
             <div>
               <h2>Assets Uploader</h2>
@@ -371,7 +507,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
           </div>
         </section>
 
-        <section className="gunSection2">
+        <section id="s-general" className="gunSection2">
           <div className="gunSectionHead2">
             <div>
               <h2>General Customization</h2>
@@ -410,10 +546,10 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
           </div>
         </section>
 
-        <section className="gunSection2">
+        <section id="s-music" className="gunSection2">
           <div className="gunSectionHead2">
             <div>
-              <h2>Music & Cards</h2>
+              <h2>Music &amp; Cards</h2>
               <p>Spotify, GitHub, and the text visitors see before entering.</p>
             </div>
           </div>
@@ -427,7 +563,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
           </div>
         </section>
 
-        <section className="gunSection2">
+        <section id="s-colors" className="gunSection2">
           <div className="gunSectionHead2">
             <div>
               <h2>Color Customization</h2>
@@ -437,7 +573,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
           <div className="gunColorGrid2">
             <ColorField label="Accent Color" help="Profile accents and glow." value={p.accent || "#55acee"} onChange={(v) => update({ accent: v })} />
             <ColorField label="Text Color" help="Main profile text." value={p.text_color || "#ffffff"} onChange={(v) => update({ text_color: v })} />
-            <ColorField label="Background Color" help="Fallback when no background media is set." value={p.background_color || "#000000"} onChange={(v) => update({ background_color: v })} />
+            <ColorField label="Background Color" help="Fallback when no background media is set." value={p.background_color || "#09090b"} onChange={(v) => update({ background_color: v })} />
             <ColorField label="Badge Color" help="Badge tint and glow when monochrome is enabled." value={p.icon_color || "#ffffff"} onChange={setBadgeColor} />
             <ColorField label="Links Color" help="Social and link icons only." value={p.link_color || "#ffffff"} onChange={(v) => update({ link_color: v })} />
             <ColorField label="Background Effect Color" help="Used by compatible background effects." value={p.background_effect_color || "#ffffff"} onChange={(v) => update({ background_effect_color: v })} />
@@ -454,7 +590,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
           </div>
         </section>
 
-        <section className="gunSection2">
+        <section id="s-other" className="gunSection2">
           <div className="gunSectionHead2">
             <div>
               <h2>Other Customization</h2>
@@ -471,7 +607,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
           </div>
         </section>
 
-        <section className="gunSection2">
+        <section id="s-tags" className="gunSection2">
           <div className="gunSectionHead2">
             <div>
               <h2>Tags</h2>
@@ -513,7 +649,7 @@ function LinksTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>)
 
   return (
     <div className="stack2">
-      <section className="card2">
+      <section id="s-quickadd" className="card2">
         <div className="cardHead2"><h2>Quick add</h2><p>Add common links with one click.</p></div>
         <div className="quickAdd2">
           {quickPlatforms.map((key) => {
@@ -528,7 +664,7 @@ function LinksTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>)
         </div>
       </section>
 
-      <section className="card2">
+      <section id="s-linklist" className="card2">
         <div className="cardHead2"><h2>Link list</h2><p>Custom URL images look best as 1:1 square images, at least 256 × 256.</p></div>
         <div className="rows2">
           {links.length === 0 && <div className="empty2">No links yet. Add one above.</div>}
@@ -568,7 +704,7 @@ function LayoutTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>
   return (
     <div className="stack2">
       <div className="split2">
-        <section className="card2">
+        <section id="s-layouttype" className="card2">
           <div className="cardHead2"><h2>Layout type</h2><p>Classic is centered, portfolio is split/horizontal, and scroll is section-based.</p></div>
           <div className="layoutCards2">
             {["classic", "portfolio", "scroll", "compact", "minimal", "banner"].map((layout) => (
@@ -580,7 +716,7 @@ function LayoutTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>
           </div>
         </section>
 
-        <section className="card2">
+        <section id="s-modules" className="card2">
           <div className="cardHead2"><h2>Module visibility</h2><p>Local time uses the visitor's local clock, so no timezone setting is needed.</p></div>
           <div className="moduleList2">
             {ALL_MODULES.map((moduleKey) => (
@@ -602,7 +738,7 @@ function LayoutTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>
 function MetadataTab({ p, update, onUpload, busy }: { p: Profile; update: (patch: Partial<Profile>) => void; onUpload: any; busy: string | null }) {
   return (
     <div className="split2 previewSplit2">
-      <section className="card2">
+      <section id="s-metadata" className="card2">
         <div className="cardHead2"><h2>Metadata</h2><p>Users can upload their own favicon, but the default favicon is already set.</p></div>
         <div className="formGrid2">
           <Field label="Website title" value={p.website_title || p.display_name || ""} onChange={(v) => update({ website_title: v })} className="span2" />
@@ -635,7 +771,7 @@ function SettingsTab({ p, update }: { p: Profile; update: (patch: Partial<Profil
   return (
     <div className="stack2">
       <div className="split2">
-        <section className="card2">
+        <section id="s-username" className="card2">
           <div className="cardHead2"><h2>Username</h2><p>Usernames are globally unique. Unlock before changing so it is harder to edit by accident.</p></div>
           {!unlockName ? (
             <div className="lockedBox2">
@@ -652,7 +788,7 @@ function SettingsTab({ p, update }: { p: Profile; update: (patch: Partial<Profil
           )}
         </section>
 
-        <section className="card2">
+        <section id="s-alias" className="card2">
           <div className="cardHead2"><h2>Alias</h2><p>One alias per account. Aliases are globally unique too.</p></div>
           <Field label="Alias" value={p.alias || ""} onChange={(v) => update({ alias: v.toLowerCase().replace(/[^a-z0-9_]/g, "") })} />
           <p className="helpText2">Leave blank if you do not want an alias. Save will fail if another user has it.</p>
@@ -668,7 +804,7 @@ function SettingsTab({ p, update }: { p: Profile; update: (patch: Partial<Profil
           </div>
         </section>
 
-        <section className="card2">
+        <section id="s-discord-link" className="card2">
           <div className="cardHead2"><h2>Linked Discord</h2><p>Connect Discord once to unlock presence cards and role badges.</p></div>
           <div className="linkedDiscordBox2">
             <div className="linkedDiscordIcon2"><MessageCircle size={20} /></div>
@@ -684,7 +820,7 @@ function SettingsTab({ p, update }: { p: Profile; update: (patch: Partial<Profil
       </div>
 
       <div className="split2">
-        <section className="card2">
+        <section id="s-privacy" className="card2">
           <div className="cardHead2"><h2>Privacy</h2><p>Small set of practical toggles.</p></div>
           <div className="toggleStack2">
             <Toggle label="Hide views" checked={!!p.hide_views} onChange={(v) => update({ hide_views: v })} />
@@ -719,7 +855,7 @@ function Analytics({ p }: { p: Profile }) {
         <Metric title="Daily average" value={`${Math.max(1, Math.round(views / 14))}`} sub="Average views per day." icon={<Sparkles size={18} />} />
       </div>
 
-      <section className="card2">
+      <section id="s-analytics" className="card2">
         <div className="cardHead2"><h2>Views trend</h2><p>Views are now counted by the protected API route instead of incrementing every refresh.</p></div>
         <div className="miniChart2">
           {data.map((value, index) => (
@@ -812,7 +948,7 @@ function Badges({ p, update, isOwner }: { p: Profile; update: (patch: Partial<Pr
 
   return (
     <div className="stack2">
-      <section className="card2 badgeHero2">
+      <section id="s-badges" className="card2 badgeHero2">
         <div className="cardHead2">
           <h2>Role badges</h2>
           <p>Badges are unlocked by Discord roles. You can hide badges you earned.</p>
@@ -1107,7 +1243,7 @@ function Templates({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
 
   return (
     <div className="stack2">
-      <section className="card2 templateCreate2">
+      <section id="s-templates" className="card2 templateCreate2">
         <div className="cardHead2"><h2>Create a template</h2><p>Save the current look as a public template. It only saves visuals, audio, layout, and effects — never username, alias, links, or badges.</p></div>
         <div className="templateCreateGrid2">
           <AssetUpload title="Template cover image" url={coverUrl} busy={busy === "template"} accept="image/*" onPick={uploadCover} onClear={() => setCoverUrl("")} />
@@ -1413,7 +1549,13 @@ const dashCss = `
 .dash2{min-height:100vh;background:#09090b;color:#f4f4f5;display:grid;grid-template-columns:240px minmax(0,1fr);font-family:Inter,system-ui,sans-serif}
 .side2{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid #27272a;background:#141416;display:flex;flex-direction:column;gap:20px}
 .brand2{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:600;letter-spacing:-0.02em;color:#f4f4f5}.brand2 svg{color:var(--site-accent)}
-.search2{display:flex;align-items:center;gap:10px;height:38px;border-bottom:1px solid #27272a;background:transparent;padding:0 4px;color:#71717a}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}
+.search2{display:flex;align-items:center;gap:10px;height:38px;border-bottom:1px solid #27272a;background:transparent;padding:0 4px;color:#71717a;position:relative}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}
+.searchDrop2{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;background:#141416;border:1px solid #27272a;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.5);overflow:hidden;display:grid;gap:0}
+.searchDropItem2{display:grid;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #27272a;background:transparent;cursor:pointer;transition:background 0.1s ease;gap:2px}
+.searchDropItem2:last-child{border-bottom:0}
+.searchDropItem2:hover{background:#1c1c1f}
+.searchDropLabel2{font-size:13px;font-weight:500;color:#f4f4f5}
+.searchDropSub2{font-size:11px;color:#71717a}
 .nav2{display:grid;gap:4px;overflow:auto;padding-right:4px}
 .navItem2{height:36px;border-left:2px solid transparent;background:transparent;color:#71717a;border-radius:0;display:flex;align-items:center;gap:10px;padding:0 12px 0 16px;cursor:pointer;text-align:left;font-weight:500;font-size:13px;transition:color 0.15s ease, border-color 0.15s ease}
 .navItem2:hover{color:#a1a1aa;background:transparent;border-color:transparent}
@@ -1465,7 +1607,8 @@ const dashCss = `
 .metric2 b{display:block;font-size:13px;font-weight:500;color:#a1a1aa}
 .metric2 span{display:block;color:#71717a;font-size:12px;margin-top:6px;line-height:1.4}
 
-.previewBox2{height:620px;border-radius:8px;overflow:hidden;border:1px solid #121214;background:#050507}
+.previewBox2{height:620px;border-radius:8px;overflow:hidden;border:1px solid #27272a;background:#09090b;display:flex;flex-direction:column}
+.previewBox2>*{flex:1;min-height:0;width:100%;height:100%;overflow:auto}
 .formGrid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .formGrid2 .span2{grid-column:span 2}
 
@@ -1730,7 +1873,8 @@ select option{background:#09090b;color:#f4f4f5}
 .customizePreviewHead2 small{color:#71717a;margin-top:2px;font-size:12px}
 .customizePreviewHead2 a{width:32px;height:32px;border-radius:6px;background:#09090b;border:1px solid #27272a;display:grid;place-items:center;color:#71717a;transition:color 0.15s ease}
 .customizePreviewHead2 a:hover{color:#f4f4f5}
-.customizePreviewViewport2{height:600px;border-radius:6px;overflow:hidden;border:1px solid #27272a;background:#09090b}
+.customizePreviewViewport2{height:600px;border-radius:6px;overflow:hidden;border:1px solid #27272a;background:#09090b;display:flex;flex-direction:column}
+.customizePreviewViewport2>*{flex:1;min-height:0;width:100%;height:100%;overflow:auto}
 .customizePreviewViewport2 iframe{border:0}
 .customizePreviewFooter2{display:flex;justify-content:space-between;color:#71717a;font-size:12px;padding:10px 4px 1px}
 .customizePreviewFooter2 span:last-child{text-transform:capitalize;color:#a1a1aa}

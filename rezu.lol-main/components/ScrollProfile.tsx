@@ -5,7 +5,7 @@ import { ChevronDown, Eye, MapPin } from "lucide-react";
 import { PLATFORMS } from "./platforms";
 import BrandIcon from "./BrandIcon";
 import BadgeIcon from "./BadgeIcon";
-import { BACKGROUNDS, MODULE_META, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile, DEFAULT_ACCENT, resolveProfileAccent } from "@/lib/constants";
+import { MODULE_META, MARKETPLACE_BADGES, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile, resolveProfileAccent } from "@/lib/constants";
 import About from "./modules/About";
 import DiscordCard from "./modules/DiscordCard";
 import GithubCard from "./modules/GithubCard";
@@ -14,31 +14,6 @@ import Clock from "./modules/Clock";
 import ProfileLikeButton from "./ProfileLikeButton";
 
 
-
-function badgeImageTintFilter(hex?: string) {
-  const raw = (hex || "#ffffff").replace("#", "");
-  if (!/^[0-9a-fA-F]{6}$/.test(raw)) return "grayscale(1) saturate(0) brightness(2)";
-  if (raw.toLowerCase() === "ffffff") return "grayscale(1) saturate(0) brightness(2)";
-  if (raw.toLowerCase() === "000000") return "grayscale(1) brightness(0)";
-
-  const r = parseInt(raw.slice(0, 2), 16);
-  const g = parseInt(raw.slice(2, 4), 16);
-  const b = parseInt(raw.slice(4, 6), 16);
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
-  let h = 0;
-  if (max !== min) {
-    const d = max - min;
-    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) * 60;
-    else if (max === g) h = ((b - r) / d + 2) * 60;
-    else h = ((r - g) / d + 4) * 60;
-  }
-  const brightness = Math.max(0.7, Math.min(1.7, max / 180));
-  return `grayscale(1) sepia(1) saturate(6000%) hue-rotate(${Math.round(h)}deg) brightness(${brightness.toFixed(2)})`;
-}
-
-function badgeGlyph(badge: BadgeItem, monochrome?: boolean) {
-  return monochrome ? (badge.monoIcon || badge.icon || "★") : (badge.icon || "★");
-}
 
 function useDiscordRoleBadges(profile: Profile) {
   const [badges, setBadges] = useState<BadgeItem[]>([]);
@@ -96,9 +71,8 @@ function isVideoBackground(url?: string) {
 
 export default function ScrollProfile({ profile }: { profile: Profile }) {
   const accent = resolveProfileAccent(profile.accent);
-  const text = profile.text_color || "#ffffff";
+  const text = profile.text_color || "#f4f4f5";
   const badgeColor = profile.icon_color || "#ffffff";
-  const badgeFilter = profile.monochrome_icons ? badgeImageTintFilter(badgeColor) : "none";
   const linkColor = profile.monochrome_icons ? (profile.link_color || "#ffffff") : (profile.link_color || accent);
   const hasBgMedia = /^https?:\/\//.test(profile.background_url || "");
   const hasBgVideo = hasBgMedia && isVideoBackground(profile.background_url);
@@ -107,10 +81,13 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
   const hiddenBadgeIds = new Set((profile.badges || []).filter((b) => b.enabled === false).map((b) => b.id));
   const customBadges = (profile.badges || []).filter((b) => b.id?.startsWith("custom-") && b.enabled !== false);
   const milestoneBadges = milestoneBadgesForProfile(profile).filter((badge) => !hiddenBadgeIds.has(badge.id));
-  const badges = [...roleBadges.filter((badge) => !hiddenBadgeIds.has(badge.id)), ...milestoneBadges, ...customBadges];
+  const ownedBadgeIds = Array.isArray(profile.owned_badges) ? profile.owned_badges.map(String) : [];
+  const purchasedBadges = MARKETPLACE_BADGES.filter((mb) => ownedBadgeIds.includes(mb.id) && !hiddenBadgeIds.has(mb.id));
+  const badges = [...roleBadges.filter((badge) => !hiddenBadgeIds.has(badge.id)), ...milestoneBadges, ...purchasedBadges, ...customBadges];
   const joined = profile.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
-  const opacity = Math.max(0, Math.min(100, profile.profile_opacity ?? 70)) / 100;
-  const blur = Math.max(0, Math.min(100, profile.profile_blur ?? 22));
+  const opacity = Math.max(0, Math.min(100, profile.profile_opacity ?? 100)) / 100;
+  const blur = Math.max(0, Math.min(100, profile.profile_blur ?? 0));
+  const useGlass = hasBgMedia && opacity < 1;
   const modules = (profile.modules || []).filter((k) => {
     if (!MODULE_COMPONENTS[k]) return false;
     if (k === "discord") return !!profile.discord_enabled || !!profile.discord_id;
@@ -120,8 +97,8 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
   });
 
   return (
-    <div style={{ position: "relative", minHeight: "100vh", color: text, fontFamily: profile.font === "JetBrains Mono" ? "monospace" : `${profile.font || "Inter"}, system-ui, sans-serif` }}>
-      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: hasBgMedia ? "#09090b" : BACKGROUNDS[profile.bg] || BACKGROUNDS.midnight }}>
+    <div style={{ position: "relative", minHeight: "100vh", color: text, fontFamily: profile.font === "JetBrains Mono" ? "monospace" : `${profile.font || "Inter"}, system-ui, sans-serif`, background: "#09090b" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: "#09090b" }}>
         {hasBgMedia && (
           hasBgVideo ? (
             <video
@@ -156,49 +133,42 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
             />
           )
         )}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: hasBgMedia
-              ? profile.background_effect === "none"
-                ? "transparent"
-                : profile.background_effect === "darken"
-                  ? "rgba(0,0,0,.66)"
-                  : "linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.74))"
-              : profile.profile_gradient
-                ? `radial-gradient(circle at 50% 18%, ${accent}22, transparent 60%), linear-gradient(180deg, #0f1318, #09090b)`
-                : "linear-gradient(180deg, rgba(5,5,7,0.25), rgba(5,5,7,0.75))",
-          }}
-        />
+        {hasBgMedia && profile.background_effect !== "none" && (
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: profile.background_effect === "darken" ? "rgba(0,0,0,.62)" : "rgba(9,9,11,.45)",
+            }}
+          />
+        )}
       </div>
 
-      <section style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 24 }}>
+      <section style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 32 }}>
         <div
           style={{
-            width: "min(560px,100%)",
+            width: "min(460px,100%)",
             textAlign: "center",
-            padding: "34px 28px",
-            borderRadius: 24,
-            background: opacity <= 0 ? "transparent" : `rgba(12,12,16,${opacity})`,
-            border: opacity <= 0 ? "1px solid transparent" : `1px solid ${accent}55`,
-            backdropFilter: blur <= 0 ? "none" : `blur(${blur}px)`,
-            WebkitBackdropFilter: blur <= 0 ? "none" : `blur(${blur}px)`,
-            boxShadow: opacity <= 0 ? "none" : `0 0 0 1px #ffffff08, 0 24px 80px -34px ${accent}`,
+            padding: "40px 36px 28px",
+            borderRadius: 8,
+            background: opacity <= 0 ? "transparent" : useGlass ? `rgba(20,20,22,${Math.max(0.82, opacity)})` : "#141416",
+            border: opacity <= 0 ? "1px solid transparent" : "1px solid #27272a",
+            backdropFilter: useGlass && blur > 0 ? `blur(${blur}px)` : "none",
+            WebkitBackdropFilter: useGlass && blur > 0 ? `blur(${blur}px)` : "none",
+            boxShadow: "none",
           }}
         >
           <div
             style={{
-              width: 118,
-              height: 118,
-              margin: "0 auto 16px",
+              width: 112,
+              height: 112,
+              margin: "0 auto 22px",
               overflow: "hidden",
               display: "grid",
               placeItems: "center",
-              fontSize: 52,
-              background: "#0d0d13",
-              border: `2px solid ${accent}`,
-              boxShadow: `0 0 28px ${accent}88`,
+              fontSize: 48,
+              background: "#09090b",
+              border: "1px solid #27272a",
               ...avatarShape(profile.avatar_shape),
             }}
           >
@@ -210,85 +180,88 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
             )}
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "center", flexWrap: "wrap" }}>
-            <span className="handleTipWrap">
-              <h1
-                className={profile.animated_title && profile.username_effect !== "none" ? `nameEffect ${profile.username_effect}` : ""}
-                style={{
-                  fontSize: 42,
-                  fontWeight: 900,
-                  margin: 0,
-                  letterSpacing: "-.04em",
-                  color: text,
-                  textShadow: profile.animated_title && profile.username_effect !== "none" ? `0 0 20px ${accent}` : "none",
-                  whiteSpace: profile.username_effect === "typewriter" ? "nowrap" : "normal",
-                  overflow: profile.username_effect === "typewriter" ? "hidden" : "visible",
-                  display: profile.username_effect === "typewriter" ? "inline-block" : "block",
-                  borderRight: profile.username_effect === "typewriter" ? `2px solid ${accent}` : "none",
-                  animation: profile.animated_title && profile.username_effect === "sparkle" ? "titlePulse 2.4s ease-in-out infinite" : profile.animated_title && profile.username_effect === "typewriter" ? "typewriterName 4.8s steps(24,end) infinite, caretBlink .8s step-end infinite" : "none",
-                }}
-              >
-                {profile.display_name || profile.username}
-              </h1>
-              <span className="handleTipBox">{profile.public_uid ? `UUID #${profile.public_uid}` : profile.id ? `Account ${profile.id}` : "Account"}</span>
-            </span>
-            {badges.length > 0 && (
-              <div
-                style={{
-                  display: "inline-flex",
-                  gap: 7,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  flexBasis: badges.length > 4 ? "100%" : "auto",
-                  width: badges.length > 4 ? "100%" : "auto",
-                  marginTop: badges.length > 4 ? 6 : 0,
-                }}
-              >
-                {badges.map((badge) => {
-                  const isCustom = !!badge.custom || badge.id?.startsWith("custom-");
-                  return (
-                    <span
-                      key={badge.id}
-                      className="badgeTipWrap"
-                      style={{
-                        display: "inline-grid",
-                        placeItems: "center",
-                        fontSize: 16,
-                        lineHeight: 1,
-                        color: isCustom ? "inherit" : badgeColor,
-                        textShadow: !isCustom && profile.badges_glow !== false ? `0 0 12px ${badgeColor}` : "none",
-                        cursor: "help",
-                      }}
-                    >
-                      <BadgeIcon
-                        badge={badge}
-                        monochrome={profile.monochrome_icons !== false}
-                        color={badgeColor}
-                        glow={!isCustom && profile.badges_glow !== false}
-                        size={18}
-                      />
-                      <span className="badgeTipBox">{badge.name}</span>
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <span className="handleTipWrap">
+            <h1
+              className={profile.animated_title && profile.username_effect !== "none" ? `nameEffect ${profile.username_effect}` : ""}
+              style={{
+                fontSize: 30,
+                fontWeight: 600,
+                margin: 0,
+                letterSpacing: "-.03em",
+                lineHeight: 1.15,
+                color: text,
+                textShadow: "none",
+                whiteSpace: profile.username_effect === "typewriter" ? "nowrap" : "normal",
+                overflow: profile.username_effect === "typewriter" ? "hidden" : "visible",
+                display: profile.username_effect === "typewriter" ? "inline-block" : "block",
+                borderRight: profile.username_effect === "typewriter" ? `2px solid ${accent}` : "none",
+                animation: profile.animated_title && profile.username_effect === "sparkle" ? "titlePulse 2.4s ease-in-out infinite" : profile.animated_title && profile.username_effect === "typewriter" ? "typewriterName 4.8s steps(24,end) infinite, caretBlink .8s step-end infinite" : "none",
+              }}
+            >
+              {profile.display_name || profile.username}
+            </h1>
+            <span className="handleTipBox">{profile.public_uid ? `UUID #${profile.public_uid}` : profile.id ? `Account ${profile.id}` : "Account"}</span>
+          </span>
 
-          <p style={{ color: "#d7d7e3", fontSize: 14, margin: "5px 0 0" }}>@{profile.username}</p>
-          {profile.alias && !profile.hide_alias && <p style={{ color: "#aaa", fontSize: 12, margin: "3px 0 0" }}>alias: @{profile.alias}</p>}
-          {profile.bio && <p style={{ color: text, fontSize: 15, lineHeight: 1.55, margin: "14px auto 0", maxWidth: 460 }}>{profile.bio}</p>}
+          {badges.length > 0 && (
+            <div
+              style={{
+                display: "inline-flex",
+                gap: 10,
+                alignItems: "center",
+                flexWrap: "wrap",
+                justifyContent: "center",
+                width: "100%",
+                marginTop: 14,
+              }}
+            >
+              {badges.map((badge) => {
+                const isCustom = !!badge.custom || badge.id?.startsWith("custom-");
+                return (
+                  <span
+                    key={badge.id}
+                    className="badgeTipWrap"
+                    aria-label={badge.name}
+                    style={{
+                      display: "inline-grid",
+                      placeItems: "center",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8,
+                      background: "#18181b",
+                      border: "1px solid #27272a",
+                      color: isCustom ? "inherit" : badgeColor,
+                      cursor: "help",
+                      flex: "none",
+                    }}
+                  >
+                    <BadgeIcon
+                      badge={badge}
+                      monochrome={profile.monochrome_icons !== false}
+                      color={badgeColor}
+                      glow={false}
+                      size={22}
+                    />
+                    <span className="badgeTipBox">{badge.name}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          <p style={{ color: "#71717a", fontSize: 14, margin: "12px 0 0", fontFamily: "monospace" }}>@{profile.username}</p>
+          {profile.alias && !profile.hide_alias && <p style={{ color: "#71717a", fontSize: 12, margin: "6px 0 0" }}>alias: @{profile.alias}</p>}
+          {profile.bio && <p style={{ color: text, fontSize: 15, lineHeight: 1.55, margin: "16px auto 0", maxWidth: 420 }}>{profile.bio}</p>}
           {profile.location && (
-            <p style={{ margin: "10px 0 0", fontSize: 13, color: "#cacada", display: "inline-flex", gap: 5, alignItems: "center" }}>
+            <p style={{ margin: "12px 0 0", fontSize: 13, color: "#71717a", display: "inline-flex", gap: 5, alignItems: "center" }}>
               <MapPin size={14} /> {profile.location}
             </p>
           )}
 
           {(profile.skills || []).length > 0 && (
-            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginTop: 14 }}>
+            <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 8, marginTop: 16 }}>
               {(profile.skills || []).map((tag) => (
-                <span key={tag} style={{ fontSize: 12, fontWeight: 700, padding: "6px 10px", borderRadius: 999, background: `${accent}20`, border: `1px solid ${accent}55`, color: text }}>
+                <span key={tag} style={{ fontSize: 12, fontWeight: 500, padding: "5px 10px", borderRadius: 6, background: "#18181b", border: "1px solid #27272a", color: "#a1a1aa" }}>
                   {tag}
                 </span>
               ))}
@@ -296,7 +269,7 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
           )}
 
           {profile.links?.length > 0 && (
-            <div style={{ display: "flex", gap: 16, marginTop: 22, flexWrap: "wrap", justifyContent: "center" }}>
+            <div style={{ display: "flex", gap: 16, marginTop: 20, flexWrap: "wrap", justifyContent: "center" }}>
               {profile.links.filter((l) => !l.hidden && l.url).map((l) => {
                 const P = PLATFORMS[l.platform] || PLATFORMS.website;
                 const customImg = l.platform === "website" && /^https?:\/\//.test(l.image_url || "");
@@ -322,8 +295,8 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
             </div>
           )}
 
-          <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 16, color: "#b7b7c6", fontSize: 12, flexWrap: "wrap" }}>
-            {!profile.hide_views && <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Eye size={14} /> {(profile.views || 0).toLocaleString()}</span>}
+          <div style={{ marginTop: 28, borderTop: "1px solid #27272a", paddingTop: 18, display: "flex", justifyContent: "center", gap: 22, color: "#a1a1aa", fontSize: 13, flexWrap: "wrap", fontWeight: 500 }}>
+            {!profile.hide_views && <span style={{ display: "inline-flex", alignItems: "center", gap: 7 }}><Eye size={15} /> {(profile.views || 0).toLocaleString()}</span>}
             {!profile.hide_likes && <ProfileLikeButton username={profile.username} initialLikes={profile.like_count || 0} accent={resolveProfileAccent(profile.accent)} />}
             {!profile.hide_join_date && joined && <span>Joined {joined}</span>}
           </div>
@@ -342,7 +315,7 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
         return (
           <section key={key} style={{ minHeight: "66vh", display: "grid", placeItems: "center", padding: "42px 24px" }}>
             <div style={{ width: "min(560px,100%)" }}>
-              <h2 style={{ fontSize: 22, fontWeight: 900, margin: "0 0 14px", color: text }}>
+              <h2 style={{ fontSize: 16, fontWeight: 600, margin: "0 0 14px", color: text, letterSpacing: "-.01em" }}>
                 {MODULE_META[key]}
               </h2>
               <Comp profile={profile} />
@@ -357,10 +330,10 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
           50% { filter: brightness(1.25); transform: translateY(-1px); }
         }
         .handleTipWrap { position: relative; display: inline-flex; align-items: center; justify-content: center; cursor: default; }
-        .handleTipBox { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); opacity: 0; pointer-events: none; white-space: nowrap; padding: 7px 10px; border-radius: 999px; background: rgba(12,12,16,.86); border: 1px solid rgba(255,255,255,.12); box-shadow: 0 16px 40px rgba(0,0,0,.35); color: #fff; font-size: 12px; transition: .16s ease; backdrop-filter: blur(10px); }
+        .handleTipBox { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); opacity: 0; pointer-events: none; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: #141416; border: 1px solid #27272a; color: #f4f4f5; font-size: 12px; transition: .16s ease; }
         .handleTipWrap:hover .handleTipBox { opacity: 1; transform: translateX(-50%) translateY(0); }
         .badgeTipWrap { position: relative; }
-        .badgeTipBox { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); opacity: 0; pointer-events: none; white-space: nowrap; padding: 6px 9px; border-radius: 999px; background: rgba(12,12,16,.9); border: 1px solid rgba(255,255,255,.12); color: #fff; font-size: 11px; transition: .16s ease; box-shadow: 0 12px 32px rgba(0,0,0,.35); }
+        .badgeTipBox { position: absolute; left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%) translateY(4px); opacity: 0; pointer-events: none; white-space: nowrap; padding: 6px 10px; border-radius: 6px; background: #141416; border: 1px solid #27272a; color: #f4f4f5; font-size: 12px; z-index: 4; transition: .16s ease; }
         .badgeTipWrap:hover .badgeTipBox { opacity: 1; transform: translateX(-50%) translateY(0); }
         @keyframes typewriterName {
           0%, 10% { width: 0; }
