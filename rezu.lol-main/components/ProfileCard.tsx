@@ -29,12 +29,22 @@ function ModuleCards({ profile }: { profile: Profile }) {
   if (!showDiscord && !showGithub && !showSpotify && !showClock) return null;
 
   return (
-    <div style={{ display: "grid", gap: 10 }}>
+    <div className="profile-modules">
       {showDiscord && <DiscordCard profile={profile} />}
       {showGithub && <GithubCard profile={profile} />}
       {showSpotify && <SpotifyCard profile={profile} />}
       {showClock && <Clock profile={profile} />}
     </div>
+  );
+}
+
+function hasModules(profile: Profile) {
+  const modules = profile.modules || [];
+  return (
+    (modules.includes("discord") && (!!profile.discord_enabled || !!profile.discord_id)) ||
+    (modules.includes("github") && !!profile.github_user) ||
+    (modules.includes("spotify") && !!profile.spotify_url) ||
+    modules.includes("clock")
   );
 }
 
@@ -48,6 +58,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
   const isBanner = profile.layout === "banner";
   const wide = isPortfolio || isBanner;
   const showBanner = hasBg && !isMinimal;
+  const modulesOn = hasModules(profile);
 
   return (
     <div className="profile-page" style={{ fontFamily: fontFamily(profile.font) }}>
@@ -60,6 +71,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
             "profile-card",
             showBanner ? "has-banner" : "no-banner",
             isCompact ? "is-compact" : "",
+            modulesOn ? "has-modules" : "",
           ].join(" ")}
         >
           {showBanner && <ProfileBanner profile={profile} height={isCompact ? 88 : wide ? 140 : 120} />}
@@ -86,9 +98,9 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
               />
             </div>
           )}
-        </article>
 
-        <ModuleCards profile={profile} />
+          <ModuleCards profile={profile} />
+        </article>
 
         <a href="/" className="profile-mark">
           {SITE_NAME.includes(".") ? (

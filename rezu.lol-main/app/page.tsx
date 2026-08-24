@@ -15,7 +15,7 @@ function MockProfile() {
         <span>Preview</span>
         <span>{SITE_NAME}/luna</span>
       </div>
-      <article className="profile-card no-banner" style={{ pointerEvents: "none" }}>
+      <article className="profile-card no-banner has-modules" style={{ pointerEvents: "none" }}>
         <div className="profile-body">
           <div className="profile-avatar-wrap">
             <div className="profile-avatar" style={{ borderRadius: "50%", fontSize: 34, color: "#a1a1aa" }}>
@@ -57,30 +57,32 @@ function MockProfile() {
             <span className="profile-stat">Joined Mar 2025</span>
           </div>
         </div>
+        <div className="profile-modules">
+          <div className="module-card">
+            <div style={{ position: "relative", width: 40, height: 40, flex: "none" }}>
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#18181b", border: "1px solid #27272a" }} />
+              <span style={{ position: "absolute", right: -1, bottom: -1, width: 12, height: 12, borderRadius: "50%", background: "#22c55e", border: "2px solid #141416" }} />
+            </div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div className="module-name" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                luna <span style={{ fontSize: 11, fontWeight: 600, color: "#22c55e" }}>online</span>
+              </div>
+              <div className="module-sub" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <MessageCircle size={13} /> Listening to something quiet
+              </div>
+            </div>
+          </div>
+          <div className="module-card">
+            <div style={{ width: 40, height: 40, borderRadius: 10, background: "#09090b", border: "1px solid #27272a", display: "grid", placeItems: "center", flex: "none" }}>
+              <Clock size={18} style={{ color: "#a1a1aa" }} />
+            </div>
+            <div>
+              <div className="module-name" style={{ fontVariantNumeric: "tabular-nums" }}>21:04:12</div>
+              <div className="module-sub">Local time</div>
+            </div>
+          </div>
+        </div>
       </article>
-      <div className="module-card" style={{ marginTop: 10, pointerEvents: "none" }}>
-        <div style={{ position: "relative", width: 40, height: 40, flex: "none" }}>
-          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#18181b", border: "1px solid #27272a" }} />
-          <span style={{ position: "absolute", right: -1, bottom: -1, width: 12, height: 12, borderRadius: "50%", background: "#22c55e", border: "2px solid #141416" }} />
-        </div>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div className="module-name" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            luna <span style={{ fontSize: 11, fontWeight: 600, color: "#22c55e" }}>online</span>
-          </div>
-          <div className="module-sub" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <MessageCircle size={13} /> Listening to something quiet
-          </div>
-        </div>
-      </div>
-      <div className="module-card" style={{ marginTop: 10, pointerEvents: "none" }}>
-        <div style={{ width: 40, height: 40, borderRadius: 10, background: "#09090b", border: "1px solid #27272a", display: "grid", placeItems: "center", flex: "none" }}>
-          <Clock size={18} style={{ color: "#a1a1aa" }} />
-        </div>
-        <div>
-          <div className="module-name" style={{ fontVariantNumeric: "tabular-nums" }}>21:04:12</div>
-          <div className="module-sub">Local time</div>
-        </div>
-      </div>
     </div>
   );
 }
