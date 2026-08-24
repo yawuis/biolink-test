@@ -75,6 +75,7 @@ export type Profile = {
   hide_alias?: boolean;
   aliases?: AliasItem[];
   badges?: BadgeItem[];
+  owned_badges?: string[];
   text_color?: string;
   icon_color?: string;
   link_color?: string;
@@ -224,3 +225,39 @@ export function badgesFromDiscordRoleIds(roleIds: string[]): BadgeItem[] {
     .filter((badge) => roles.has(badge.roleId))
     .map(({ id, name, icon, monoIcon }) => ({ id, name, icon, monoIcon, enabled: true }));
 }
+
+export const PREMIUM_3_LETTER_USERNAMES = new Set([
+  "dev", "vip", "ceo", "lol", "app", "bot", "btc", "eth", "sol", "nft", 
+  "pro", "fun", "wtf", "wow", "god", "sad", "bad", "run", "fly", "win", 
+  "out", "new", "old", "use", "get", "set", "key", "api", "web", "dns", 
+  "git", "hub", "sql", "pay", "usd", "ltd", "gem", "one", "yes", "top"
+]);
+
+export function isPremiumUsername(username: string): boolean {
+  const len = (username || "").trim().length;
+  if (len === 1 || len === 2) return true;
+  if (len === 3) return PREMIUM_3_LETTER_USERNAMES.has(username.toLowerCase().trim());
+  return false;
+}
+
+export const MARKETPLACE_BADGES: BadgeItem[] = [
+  { id: "gold_crown", name: "Gold Crown", icon: "👑", custom: true },
+  { id: "star_player", name: "Star Player", icon: "⭐", custom: true },
+  { id: "flame_active", name: "On Fire", icon: "🔥", custom: true },
+  { id: "shield_protect", name: "Shield", icon: "🛡️", custom: true },
+  { id: "gem_collector", name: "Gem Collector", icon: "💎", custom: true },
+  { id: "heart_supporter", name: "Supporter", icon: "❤️", custom: true },
+];
+
+export const MARKETPLACE_PRICES: Record<string, number> = {
+  username_1_letter: 199.00,
+  username_2_letter: 99.00,
+  username_3_letter: 49.00,
+  gold_crown: 15.00,
+  star_player: 10.00,
+  flame_active: 8.00,
+  shield_protect: 5.00,
+  gem_collector: 12.00,
+  heart_supporter: 3.00,
+};
+

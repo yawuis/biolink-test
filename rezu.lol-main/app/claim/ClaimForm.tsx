@@ -10,7 +10,7 @@ export default function ClaimForm({ userId, suggested }: { userId: string; sugge
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
   const [username, setUsername] = useState(suggested || "");
-  const [status, setStatus] = useState<"idle" | "checking" | "free" | "taken" | "invalid">("idle");
+  const [status, setStatus] = useState<"idle" | "checking" | "free" | "taken" | "invalid" | "premium_locked">("idle");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -19,8 +19,20 @@ export default function ClaimForm({ userId, suggested }: { userId: string; sugge
     if (!USERNAME_RE.test(username)) return setStatus("invalid");
     setStatus("checking");
     const t = setTimeout(async () => {
+      // Check if taken in profiles
       const { data } = await supabase.from("profiles").select("id").or(`username.eq.${username},alias.eq.${username}`).maybeSingle();
-      setStatus(data ? "taken" : "free");
+      if (data) {
+        setStatus("taken");
+      } else {
+        // Check if premium handle
+        const { isPremiumUsername } = await import("@/lib/constants");
+        if (isPremiumUsername(username)) {
+          const { data: purchase } = await supabase.from("purchased_usernames").select("id").eq("username", username).eq("user_id", userId).maybeSingle();
+          setStatus(purchase ? "free" : "premium_locked");
+        } else {
+          setStatus("free");
+        }
+      }
     }, 350);
     return () => clearTimeout(t);
   }, [username]);
@@ -29,15 +41,13 @@ export default function ClaimForm({ userId, suggested }: { userId: string; sugge
     setError("");
     if (!USERNAME_RE.test(username)) return setError("1–20 lowercase letters, numbers, or _");
     if (status === "taken") return setError("That name is taken.");
+    if (status === "premium_locked") return setError("This is a premium handle. Buy it in the Marketplace first.");
     setLoading(true);
     const { error: insertErr } = await supabase.from("profiles").insert({
       id: userId,
       username,
       display_name: username,
       accent: DEFAULT_ACCENT,
-      // Important: older SQL upgrades created discord_id with default ''.
-      // v20 added a check that only allows NULL or real Discord digits.
-      // New profiles must start as NULL until they link Discord through OAuth.
       discord_id: null,
       discord_enabled: false,
     });
@@ -68,18 +78,19 @@ export default function ClaimForm({ userId, suggested }: { userId: string; sugge
           <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", display: "flex" }}>
             {status === "checking" && <Loader2 size={16} className="spin" style={{ color: "#6b6b7b" }} />}
             {status === "free" && <Check size={16} style={{ color: "#4ade80" }} />}
-            {(status === "taken" || status === "invalid") && <X size={16} style={{ color: "#f87171" }} />}
+            {(status === "taken" || status === "invalid" || status === "premium_locked") && <X size={16} style={{ color: "#f87171" }} />}
           </span>
         </div>
         <div style={{ minHeight: 18, fontSize: 12, marginTop: 5, color: status === "free" ? "#4ade80" : "#f87171" }}>
           {status === "free" && "Available ✓"}
           {status === "taken" && "Already claimed"}
+          {status === "premium_locked" && "Premium Handle (Buy it in the Marketplace)"}
           {status === "invalid" && "1–20 lowercase letters, numbers, or _"}
         </div>
 
         {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 6 }}>{error}</p>}
 
-        <button className="btn" onClick={claim} disabled={loading || status === "taken" || status === "checking"}
+        <button className="btn" onClick={claim} disabled={loading || status === "taken" || status === "checking" || status === "premium_locked"}
                 style={{ background: "#e11d2e", color: "#fff", width: "100%", marginTop: 16 }}>
           {loading ? "Claiming…" : "Claim it"}
         </button>

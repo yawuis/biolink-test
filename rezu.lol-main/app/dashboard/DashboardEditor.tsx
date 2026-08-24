@@ -52,6 +52,7 @@ import {
   type BadgeItem,
   type LinkItem,
   type Profile,
+  MARKETPLACE_BADGES,
 } from "@/lib/constants";
 import { resizeCursorPng, uploadFile } from "@/lib/upload";
 import { createClient } from "@/lib/supabase/client";
@@ -775,6 +776,7 @@ function Badges({ p, update, isOwner }: { p: Profile; update: (patch: Partial<Pr
   const customBadges = savedBadges.filter((badge) => badge.id?.startsWith("custom-"));
   const foundingEligible = Number(p.public_uid || 0) > 0 && Number(p.public_uid || 0) < 200;
   const foundingVisible = savedMap.get(FOUNDING_100_BADGE.id) ?? true;
+  const ownedBadges = Array.isArray(p.owned_badges) ? p.owned_badges.map(String) : [];
 
   const updateBadgeList = (nextItems: BadgeItem[]) => {
     const base = new Map((p.badges || []).map((badge) => [badge.id, badge]));
@@ -860,6 +862,44 @@ function Badges({ p, update, isOwner }: { p: Profile; update: (patch: Partial<Pr
             ) : <span className="badgeLock2">Locked</span>}
           </div>
         </div>
+      </section>
+
+      {/* Marketplace Badges Section */}
+      <section className="card2">
+        <div className="cardHead2">
+          <h2>Marketplace badges</h2>
+          <p>Unlocks purchased from the Marketplace. Toggle them on or off here.</p>
+        </div>
+        {ownedBadges.length > 0 ? (
+          <div className="badgeGrid2 roleBadgeGrid2">
+            {MARKETPLACE_BADGES
+              .filter((mb) => ownedBadges.includes(mb.id))
+              .map((badge) => {
+                const visible = savedMap.get(badge.id) ?? true;
+                return (
+                  <div key={badge.id} className={`badge2 roleBadge2 ${visible ? "on" : "off"}`}>
+                    <span className="badgeEmoji2">{badge.icon}</span>
+                    <div>
+                      <strong>{badge.name}</strong>
+                      <small>{visible ? "Showing on profile" : "Hidden from profile"}</small>
+                    </div>
+                    <button
+                      type="button"
+                      className={`badgeToggle2 ${visible ? "enabled" : "disabled"}`}
+                      onClick={() => setBadgeVisible(badge.id, !visible)}
+                    >
+                      {visible ? "Shown" : "Hidden"}
+                    </button>
+                  </div>
+                );
+              })}
+          </div>
+        ) : (
+          <div className="empty2" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>No premium badges purchased yet.</span>
+            <a href="/marketplace" style={{ color: "#e11d2f", textDecoration: "none", fontWeight: 600, fontSize: 13 }}>Visit Marketplace →</a>
+          </div>
+        )}
       </section>
 
       <section className="card2">

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { DISCORD_INVITE_URL, OWNER_ROLE_ID, USERNAME_RE, type Profile } from "@/lib/constants";
+import { DISCORD_INVITE_URL, OWNER_ROLE_ID, USERNAME_RE, type Profile, isPremiumUsername, MARKETPLACE_BADGES } from "@/lib/constants";
 
 
 async function userHasOwnerDiscordRole(discordId?: string) {
@@ -28,11 +28,19 @@ async function userHasOwnerDiscordRole(discordId?: string) {
   }
 }
 
-function sanitizeBadges(input: any[], canUseCustomBadges: boolean) {
+function sanitizeBadges(input: any[], canUseCustomBadges: boolean, ownedBadges: string[]) {
   if (!Array.isArray(input)) return [];
+  const ownedSet = new Set(ownedBadges);
   return input
     .filter((badge) => badge && typeof badge.id === "string")
-    .filter((badge) => canUseCustomBadges || !badge.id.startsWith("custom-"))
+    .filter((badge) => {
+      // 1. If it's a marketplace badge, check if they own it
+      const isMarketplace = MARKETPLACE_BADGES.some((mb) => mb.id === badge.id);
+      if (isMarketplace) return ownedSet.has(badge.id);
+
+      // 2. Otherwise standard custom badge checks
+      return canUseCustomBadges || !badge.id.startsWith("custom-");
+    })
     .map((badge) => ({
       id: String(badge.id).slice(0, 80),
       name: String(badge.name || "Badge").slice(0, 40),
@@ -74,7 +82,7 @@ export async function saveProfile(data: Partial<Profile>) {
 
   const { data: current } = await supabase
     .from("profiles")
-    .select("id, username, alias, discord_id")
+    .select("id, username, alias, discord_id, owned_badges")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -84,7 +92,20 @@ export async function saveProfile(data: Partial<Profile>) {
     return { error: "Your alias cannot be the same as your username." };
   }
 
+  // Enforce premium constraints on username
   if (username !== String(current.username).toLowerCase()) {
+    if (isPremiumUsername(username) && !isOwner) {
+      const { data: purchase } = await supabase
+        .from("purchased_usernames")
+        .select("id")
+        .eq("username", username)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!purchase) {
+        return { error: "That username is a premium handle. Purchase it in the Marketplace to use it." };
+      }
+    }
+
     const { data: taken } = await supabase
       .from("profiles")
       .select("id")
@@ -94,7 +115,20 @@ export async function saveProfile(data: Partial<Profile>) {
     if (taken) return { error: "That username is already taken as a username or alias." };
   }
 
-  if (alias) {
+  // Enforce premium constraints on alias
+  if (alias && alias !== String(current.alias || "").toLowerCase()) {
+    if (isPremiumUsername(alias) && !isOwner) {
+      const { data: purchase } = await supabase
+        .from("purchased_usernames")
+        .select("id")
+        .eq("username", alias)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!purchase) {
+        return { error: "That alias is a premium handle. Purchase it in the Marketplace to use it." };
+      }
+    }
+
     const { data: takenAlias } = await supabase
       .from("profiles")
       .select("id")
@@ -106,7 +140,8 @@ export async function saveProfile(data: Partial<Profile>) {
 
   const hasOwnerDiscordRole = await userHasOwnerDiscordRole((current as any).discord_id);
   const canUseCustomBadges = isOwner || hasOwnerDiscordRole;
-  const safeBadges = sanitizeBadges(Array.isArray(data.badges) ? data.badges : [], canUseCustomBadges);
+  const ownedBadges = Array.isArray(current.owned_badges) ? current.owned_badges.map(String) : [];
+  const safeBadges = sanitizeBadges(Array.isArray(data.badges) ? data.badges : [], canUseCustomBadges, ownedBadges);
 
   const payload = {
     username,
