@@ -10,10 +10,12 @@ export async function middleware(request: NextRequest) {
 
   // Keep production auth on one cookie domain. This prevents users from being
   // logged into the Vercel app but logged out on rezu.lol.
+  /*
   if (!isLocal && !canonicalIsLocal && canonical && currentOrigin !== canonical && request.nextUrl.hostname.endsWith("vercel.app")) {
     const target = new URL(request.nextUrl.pathname + request.nextUrl.search, canonical);
     return NextResponse.redirect(target);
   }
+  */
 
   let response = NextResponse.next({ request });
 
