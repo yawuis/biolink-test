@@ -44,8 +44,16 @@ export async function middleware(request: NextRequest) {
   );
 
   // Refreshes the session cookie so server components see a valid user without
-  // making people sign in again every time.
-  await supabase.auth.getUser();
+  // making people sign in again every time. Wrap in a Promise.race to prevent
+  // Vercel middleware execution timeout on database cold starts.
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase auth timeout")), 950))
+    ]);
+  } catch (err) {
+    console.error("Middleware session refresh timed out or failed:", err);
+  }
   return response;
 }
 

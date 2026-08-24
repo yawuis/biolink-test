@@ -24,6 +24,13 @@ export const DEFAULT_ACCENT = "#55acee";
 export const SITE_NAME = "sob.lol";
 export const DISCORD_INVITE_URL = "https://discord.gg/rezu";
 
+export function resolveProfileAccent(accent?: string | null) {
+  if (!accent) return DEFAULT_ACCENT;
+  const lower = accent.toLowerCase().trim();
+  if (lower === "#e11d2f" || lower === "#e11d2e") return DEFAULT_ACCENT;
+  return accent;
+}
+
 export const USERNAME_RE = /^[a-z0-9_]{1,20}$/;
 
 export type LinkItem = { id: number; platform: string; url: string; label?: string; hidden?: boolean; image_url?: string };

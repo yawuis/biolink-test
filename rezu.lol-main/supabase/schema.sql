@@ -13,7 +13,7 @@ create table if not exists public.profiles (
   username     citext unique not null,          -- ← THE uniqueness guarantee
   display_name text   default '',
   bio          text   default '',
-  accent       text   default '#e11d2f',
+  accent       text   default '#55acee',
   bg           text   default 'void',
   avatar_url   text   default '',
   links        jsonb  default '[]'::jsonb,

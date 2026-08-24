@@ -5,7 +5,7 @@ import { Eye, MapPin } from "lucide-react";
 import { PLATFORMS } from "./platforms";
 import BrandIcon from "./BrandIcon";
 import BadgeIcon from "./BadgeIcon";
-import { BACKGROUNDS, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile, MARKETPLACE_BADGES, DEFAULT_ACCENT } from "@/lib/constants";
+import { BACKGROUNDS, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile, MARKETPLACE_BADGES, DEFAULT_ACCENT, resolveProfileAccent } from "@/lib/constants";
 import DiscordCard from "./modules/DiscordCard";
 import GithubCard from "./modules/GithubCard";
 import SpotifyCard from "./modules/SpotifyCard";
@@ -60,7 +60,7 @@ function hrefFor(raw?: string) {
 }
 
 function LinkIcons({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
+  const accent = resolveProfileAccent(profile.accent);
   const iconColor = profile.monochrome_icons ? (profile.link_color || "#ffffff") : (profile.link_color || accent);
   const links = (profile.links || []).filter((l) => !l.hidden && l.url);
 
@@ -105,7 +105,7 @@ function LinkIcons({ profile }: { profile: Profile }) {
 }
 
 function SkillTags({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
+  const accent = resolveProfileAccent(profile.accent);
   const tags = profile.skills || [];
   if (tags.length === 0) return null;
 
@@ -265,7 +265,7 @@ function StatsRow({ profile }: { profile: Profile }) {
   return (
     <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 16, color: "#b7b7c6", fontSize: 12, flexWrap: "wrap" }}>
       {!profile.hide_views && <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Eye size={14} /> {(profile.views || 0).toLocaleString()}</span>}
-      {!profile.hide_likes && <ProfileLikeButton username={profile.username} initialLikes={profile.like_count || 0} accent={profile.accent || DEFAULT_ACCENT} />}
+      {!profile.hide_likes && <ProfileLikeButton username={profile.username} initialLikes={profile.like_count || 0} accent={resolveProfileAccent(profile.accent)} />}
       {!profile.hide_join_date && joined && <span>Joined {joined}</span>}
     </div>
   );
@@ -276,7 +276,7 @@ function isVideoBackground(url?: string) {
 }
 
 function Background({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
+  const accent = resolveProfileAccent(profile.accent);
   const hasBgMedia = /^https?:\/\//.test(profile.background_url || "");
   const hasBgVideo = hasBgMedia && isVideoBackground(profile.background_url);
   const fallbackBg = profile.background_color || (BACKGROUNDS[profile.bg] || BACKGROUNDS.midnight);
@@ -338,7 +338,7 @@ function Background({ profile }: { profile: Profile }) {
 
 function AvatarBlock({ profile, size = 92 }: { profile: Profile; size?: number }) {
   const isImg = /^https?:\/\//.test(profile.avatar_url || "");
-  const accent = profile.accent || DEFAULT_ACCENT;
+  const accent = resolveProfileAccent(profile.accent);
   return (
     <div
       style={{
@@ -368,7 +368,7 @@ function AvatarBlock({ profile, size = 92 }: { profile: Profile; size?: number }
 
 function NameBlock({ profile, align = "center" }: { profile: Profile; align?: "center" | "left" }) {
   const text = profile.text_color || "#ffffff";
-  const accent = profile.accent || DEFAULT_ACCENT;
+  const accent = resolveProfileAccent(profile.accent);
   const animated = profile.animated_title && profile.username_effect !== "none";
   return (
     <div style={{ textAlign: align }}>
@@ -403,7 +403,7 @@ function NameBlock({ profile, align = "center" }: { profile: Profile; align?: "c
 }
 
 export default function ProfileCard({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
+  const accent = resolveProfileAccent(profile.accent);
   const text = profile.text_color || "#ffffff";
   const opacity = Math.max(0, Math.min(100, profile.profile_opacity ?? 70)) / 100;
   const blur = Math.max(0, Math.min(100, profile.profile_blur ?? 22));

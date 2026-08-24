@@ -75,7 +75,7 @@ begin
     new.id,
     clean_username,
     coalesce(nullif(new.raw_user_meta_data ->> 'display_name', ''), requested),
-    '#e11d2e',
+    '#55acee',
     '#ffffff',
     '#ffffff',
     '#000000',

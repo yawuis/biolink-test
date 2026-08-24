@@ -9,7 +9,7 @@ create extension if not exists citext;
 
 -- Red/black/gray/white defaults for new profiles.
 alter table public.profiles
-  alter column accent set default '#e11d2f',
+  alter column accent set default '#55acee',
   alter column bg set default 'void';
 
 alter table public.profiles
