@@ -53,8 +53,6 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
     const tryPlay = () => {
       if (playbackToken.current !== token) return;
       audio.play().catch(() => {
-        // Some browsers need the file to buffer after the first click.
-        // Keep the same user-requested track queued and start as soon as it can play.
         const onReady = () => {
           if (playbackToken.current === token) audio.play().catch(() => {});
         };
@@ -73,7 +71,6 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
     setEntered(true);
     playTrack(startIndex, true);
   };
-
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -112,25 +109,15 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
     playTrack(next, true);
   };
 
-  const isScroll = profile.layout === "scroll";
-
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        position: "relative",
-        background: "#09090b",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <main style={{ minHeight: "100vh", position: "relative", background: "#09090b" }}>
       {customCursorUrl && (
         <style>{`html, body, body * { cursor: url("${customCursorUrl}") 0 0, auto !important; }`}</style>
       )}
       {entered && <Effects accent={accent} effect={profile.effect} cursor={profile.cursor_effect} />}
 
-      <div style={{ position: "relative", zIndex: 0, flex: 1, minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-        {isScroll ? (
+      <div style={{ position: "relative", zIndex: 0, minHeight: "100vh", background: "#09090b" }}>
+        {profile.layout === "scroll" ? (
           <ScrollProfile profile={profile} />
         ) : (
           <ProfileCard profile={profile} />
@@ -141,22 +128,9 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
 
       {entered && hasAudio && (
         <div
+          className="profile-audio"
           onMouseEnter={() => setShowVolume(true)}
           onMouseLeave={() => setShowVolume(false)}
-          style={{
-            position: "fixed",
-            bottom: 18,
-            right: 18,
-            zIndex: 6,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: showVolume ? "8px 12px" : 0,
-            borderRadius: 999,
-            border: showVolume ? `1px solid ${accent}66` : "none",
-            background: showVolume ? "rgba(15,15,22,0.78)" : "transparent",
-            backdropFilter: "blur(8px)",
-          }}
         >
           {showVolume && (
             <input
@@ -169,61 +143,15 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
               style={{ width: 110, accentColor: accent }}
             />
           )}
-          <button
-            onClick={toggleMute}
-            aria-label={muted ? "Unmute" : "Mute"}
-            style={{
-              width: 42,
-              height: 42,
-              borderRadius: "50%",
-              border: `1px solid ${accent}66`,
-              background: "rgba(15,15,22,0.7)",
-              color: "#e8e8ef",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(8px)",
-            }}
-          >
-            {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          <button onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"}>
+            {muted ? <VolumeX size={16} /> : <Volume2 size={16} />}
           </button>
         </div>
       )}
 
       {!entered && (
-        <button
-          onClick={enter}
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 10,
-            border: "none",
-            cursor: "pointer",
-            background: "rgba(5,5,7,0.55)",
-            backdropFilter: "blur(14px)",
-            WebkitBackdropFilter: "blur(14px)",
-            color: "#e8e8ef",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontFamily: "Inter, system-ui, sans-serif",
-          }}
-        >
-          <span
-            style={{
-              fontSize: 18,
-              letterSpacing: "0.16em",
-              textTransform: "lowercase",
-              padding: "12px 22px",
-              borderRadius: 8,
-              border: "1px solid #27272a",
-              background: "#141416",
-              color: "#f4f4f5",
-            }}
-          >
-            {enterText}
-          </span>
+        <button className="profile-enter" onClick={enter}>
+          <span>{enterText || "click to enter"}</span>
         </button>
       )}
     </main>

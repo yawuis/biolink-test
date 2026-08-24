@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Clock as ClockIcon } from "lucide-react";
-import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
-import { card } from "./style";
+import { type Profile } from "@/lib/constants";
 
-export default function Clock({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
+export default function Clock({ profile: _profile }: { profile: Profile }) {
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState<Date>(new Date());
   const [tz, setTz] = useState("Local time");
@@ -26,11 +24,13 @@ export default function Clock({ profile }: { profile: Profile }) {
     : "--- --";
 
   return (
-    <div style={{ ...card(accent), display: "flex", alignItems: "center", gap: 14 }}>
-      <ClockIcon size={30} style={{ color: accent }} />
+    <div className="module-card">
+      <div style={{ width: 44, height: 44, borderRadius: 10, background: "#09090b", border: "1px solid #27272a", display: "grid", placeItems: "center", flex: "none" }}>
+        <ClockIcon size={20} style={{ color: "#a1a1aa" }} />
+      </div>
       <div style={{ textAlign: "left" }}>
-        <div style={{ fontSize: 22, fontWeight: 900, fontVariantNumeric: "tabular-nums" }}>{time}</div>
-        <div style={{ fontSize: 12, color: "#9a9aaa" }}>{date} · {tz.replace(/_/g, " ")}</div>
+        <div className="module-name" style={{ fontVariantNumeric: "tabular-nums", fontSize: 18 }}>{time}</div>
+        <div className="module-sub">{date} · {tz.replace(/_/g, " ")}</div>
       </div>
     </div>
   );

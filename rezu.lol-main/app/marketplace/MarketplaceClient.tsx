@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Loader2, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { isPremiumUsername, MARKETPLACE_PRICES, DISCORD_ROLE_BADGES } from "@/lib/constants";
+import { isPremiumUsername, MARKETPLACE_PRICES, DISCORD_ROLE_BADGES, SITE_NAME } from "@/lib/constants";
 import { purchaseUsername, purchaseBadge } from "./actions";
 import BadgeIcon from "@/components/BadgeIcon";
+import BrandMark from "@/components/BrandMark";
 
 type BadgeItem = { id: string; name: string; icon: string };
 
 export default function MarketplaceClient({
-  userId,
+  userId: _userId,
   discordId,
   myUsernames,
   myBadges,
@@ -26,7 +27,6 @@ export default function MarketplaceClient({
   const router = useRouter();
   const supabase = createClient();
 
-  // Fetch user's Discord roles to mark earned badges as owned
   const [discordRoles, setDiscordRoles] = useState<string[]>([]);
   useEffect(() => {
     if (!discordId) return;
@@ -44,13 +44,11 @@ export default function MarketplaceClient({
     return () => { alive = false; };
   }, [discordId]);
 
-  // Username Search State
   const [searchName, setSearchName] = useState("");
   const [searchStatus, setSearchStatus] = useState<"idle" | "checking" | "available" | "taken" | "purchased" | "not_premium">("idle");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Check Username Availability
   const checkUsername = async (name: string) => {
     setError("");
     const clean = name.toLowerCase().replace(/[^a-z0-9_]/g, "").trim();
@@ -68,7 +66,6 @@ export default function MarketplaceClient({
 
     setSearchStatus("checking");
 
-    // 1. Check if claimed in profiles
     const { data: profile } = await supabase
       .from("profiles")
       .select("id")
@@ -80,7 +77,6 @@ export default function MarketplaceClient({
       return;
     }
 
-    // 2. Check if purchased in marketplace
     const { data: purchase } = await supabase
       .from("purchased_usernames")
       .select("id")
@@ -94,7 +90,6 @@ export default function MarketplaceClient({
     }
   };
 
-  // Purchase Username Handler
   const handleBuyUsername = async () => {
     if (searchStatus !== "available" || !searchName) return;
     setLoading(true);
@@ -113,7 +108,6 @@ export default function MarketplaceClient({
     }
   };
 
-  // Purchase Badge Handler
   const handleBuyBadge = async (badgeId: string, badgeName: string) => {
     if (confirm(`Confirm purchase of the "${badgeName}" badge for $${MARKETPLACE_PRICES[badgeId]?.toFixed(2)}?`)) {
       const res = await purchaseBadge(badgeId);
@@ -126,7 +120,6 @@ export default function MarketplaceClient({
     }
   };
 
-  // Calculate Price for searched username
   const getUsernamePrice = () => {
     const len = searchName.length;
     if (len === 1) return MARKETPLACE_PRICES.username_1_letter;
@@ -135,158 +128,81 @@ export default function MarketplaceClient({
     return 0;
   };
 
+  const descriptions: Record<string, string> = {
+    rich: "For contributors and supporters.",
+    og: "Early registration. You were here first.",
+    donor: "Unlocked by funding the server.",
+    premium: "Premium platform status.",
+    verified: "Account authenticity.",
+    winner: "Top community standing.",
+    early: "You believed in this early.",
+    bug: `Found issues. Helped secure ${SITE_NAME}.`,
+    helper: "Awarded to people who help.",
+    staff: "Official platform team.",
+    owner: "Core administration.",
+  };
+
   return (
-    <main style={{ minHeight: "100vh", background: "#050507", color: "#a1a1aa", padding: "60px 24px", fontFamily: "inherit" }}>
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        
-        {/* Header navigation bar */}
-        <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "60px" }}>
-          <button 
-            onClick={() => router.push("/dashboard")} 
-            style={{ 
-              background: "none", 
-              border: "none", 
-              color: "#71717a", 
-              cursor: "pointer", 
-              fontSize: "13px", 
-              fontWeight: 500,
-              fontFamily: "inherit",
-              display: "flex", 
-              alignItems: "center", 
-              gap: "8px",
-              padding: 0,
-              transition: "color 0.15s ease"
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#a1a1aa")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#71717a")}
-          >
-            <ArrowLeft size={14} /> Return to dashboard
+    <main className="mp-shell">
+      <div className="mp-wrap">
+        <header className="mp-head">
+          <button className="btn-ghost" onClick={() => router.push("/dashboard")} style={{ padding: 0, height: "auto" }}>
+            <ArrowLeft size={14} /> Dashboard
           </button>
-          <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em" }}>
-            sob<span style={{ color: "#55acee" }}>.lol</span>
-          </div>
+          <BrandMark />
         </header>
 
-        {/* Main Split Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "60px" }} className="responsive-grid">
-          <style>{`
-            @media (min-width: 900px) {
-              .responsive-grid {
-                grid-template-columns: 1fr 340px !important;
-                gap: 48px !important;
-              }
-              .inventory-col {
-                border-left: 1px solid #27272a;
-                padding-left: 48px !important;
-              }
-            }
-            .spin { animation: spin 1s linear infinite; }
-            @keyframes spin { to { transform: rotate(360deg); } }
-            .badge-item-card {
-              transition: border-color 0.15s ease, background-color 0.15s ease;
-            }
-            .badge-item-card:hover {
-              border-color: #27272a !important;
-            }
-          `}</style>
-
-          {/* Left Side: Marketplace Items */}
+        <div className="mp-grid">
           <div>
-            <div style={{ marginBottom: "50px" }}>
-              <h1 style={{ fontSize: "36px", fontWeight: "600", letterSpacing: "-0.03em", color: "#f4f4f5", margin: "0 0 12px" }}>
-                Identity Marketplace
-              </h1>
-              <p style={{ fontSize: "15px", color: "#71717a", lineHeight: "1.6", margin: 0, maxWidth: "600px" }}>
-                Curate your profile identity by securing premium handle reservations and acquiring distinctive profile badges. Items in your collection link directly to your profile.
-              </p>
-            </div>
+            <h1 className="mp-title">Marketplace</h1>
+            <p className="mp-lead">
+              Short handles and badges that sit on your profile. Buy once, keep them.
+            </p>
 
-            {/* Premium Handles Section */}
-            <div style={{ paddingBottom: "48px", borderBottom: "1px solid #27272a", marginBottom: "48px" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: "500", color: "#f4f4f5", margin: "0 0 8px" }}>
-                Premium Handles
-              </h2>
-              <p style={{ color: "#71717a", fontSize: "14px", margin: "0 0 24px", lineHeight: "1.5" }}>
-                All 1-letter, 2-letter, and select 3-letter handles are restricted. Check availability and secure your custom handle.
-              </p>
+            <section className="mp-section">
+              <h2>Premium handles</h2>
+              <p>1-letter, 2-letter, and select 3-letter names are reserved. Check one and take it if it’s free.</p>
 
-              <div style={{ display: "flex", gap: "12px", alignItems: "stretch", maxWidth: "480px" }}>
-                <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", background: "#09090b", border: "1px solid #27272a", borderRadius: "6px", width: "100%" }}>
-                  <span style={{ paddingLeft: "14px", color: "#52525b", fontSize: "14px", userSelect: "none", fontFamily: "monospace" }}>
-                    sob.lol/
-                  </span>
-                  <input 
+              <div style={{ display: "flex", gap: 10, alignItems: "stretch", maxWidth: 480 }}>
+                <div className="auth-handle" style={{ flex: 1 }}>
+                  <span className="auth-handle-prefix">{SITE_NAME}/</span>
+                  <input
                     type="text"
                     value={searchName}
                     onChange={(e) => checkUsername(e.target.value)}
                     placeholder="ab"
-                    style={{
-                      background: "transparent",
-                      border: "none",
-                      color: "#f4f4f5",
-                      fontSize: "14px",
-                      fontFamily: "monospace",
-                      padding: "10px 40px 10px 4px",
-                      width: "100%",
-                      outline: "none"
-                    }}
                   />
-                  <span style={{ position: "absolute", right: "14px", display: "flex", alignItems: "center" }}>
+                  <span className="auth-handle-status">
                     {searchStatus === "checking" && <Loader2 size={15} className="spin" style={{ color: "#71717a" }} />}
                     {searchStatus === "available" && <Check size={15} style={{ color: "#10b981" }} />}
                     {(searchStatus === "taken" || searchStatus === "purchased" || searchStatus === "not_premium") && <X size={15} style={{ color: "#ef4444" }} />}
                   </span>
                 </div>
-
                 {searchStatus === "available" && (
-                  <button 
-                    onClick={handleBuyUsername}
-                    disabled={loading}
-                    style={{
-                      background: "#f4f4f5",
-                      color: "#09090b",
-                      border: "none",
-                      borderRadius: "6px",
-                      padding: "0 20px",
-                      fontWeight: "500",
-                      fontSize: "13px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      transition: "background-color 0.15s ease"
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e4e4e7")}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#f4f4f5")}
-                  >
+                  <button className="btn-primary" onClick={handleBuyUsername} disabled={loading} style={{ height: 42 }}>
                     {loading ? <Loader2 size={13} className="spin" /> : "Acquire"}
                   </button>
                 )}
               </div>
 
-              <div style={{ minHeight: "20px", fontSize: "13px", marginTop: "10px" }}>
+              <div style={{ minHeight: 20, fontSize: 13, marginTop: 10 }}>
                 {searchStatus === "available" && (
                   <span style={{ color: "#10b981" }}>
-                    Available — Price: <strong>${getUsernamePrice()?.toFixed(2)}</strong>
+                    Available — ${getUsernamePrice()?.toFixed(2)}
                   </span>
                 )}
-                {searchStatus === "taken" && <span style={{ color: "#ef4444" }}>Already claimed by a user.</span>}
-                {searchStatus === "purchased" && <span style={{ color: "#ef4444" }}>Already purchased by someone.</span>}
-                {searchStatus === "not_premium" && <span style={{ color: "#71717a" }}>This is not a restricted handle. You can claim it for free in the dashboard!</span>}
+                {searchStatus === "taken" && <span style={{ color: "#ef4444" }}>Already claimed.</span>}
+                {searchStatus === "purchased" && <span style={{ color: "#ef4444" }}>Already purchased.</span>}
+                {searchStatus === "not_premium" && <span style={{ color: "#71717a" }}>Not a restricted handle. Claim it for free from the dashboard.</span>}
                 {error && <span style={{ color: "#ef4444" }}>{error}</span>}
               </div>
-            </div>
+            </section>
 
-            {/* Profile Badges Section */}
-            <div>
-              <h2 style={{ fontSize: "18px", fontWeight: "500", color: "#f4f4f5", margin: "0 0 8px" }}>
-                Profile Badges
-              </h2>
-              <p style={{ color: "#71717a", fontSize: "14px", margin: "0 0 28px" }}>
-                Acquire unique digital badges to display alongside your identity.
-              </p>
+            <section className="mp-section">
+              <h2>Profile badges</h2>
+              <p>Small marks that sit under your name. People notice them.</p>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "24px" }}>
+              <div className="mp-badges">
                 {availableBadges.map((badge) => {
                   const roleBadge = DISCORD_ROLE_BADGES.find((dr) => dr.id === badge.id);
                   const earnedViaDiscord = roleBadge ? discordRoles.includes(roleBadge.roleId) : false;
@@ -294,181 +210,85 @@ export default function MarketplaceClient({
                   const price = MARKETPLACE_PRICES[badge.id] || 0;
 
                   return (
-                    <div 
-                      key={badge.id}
-                      style={{
-                        background: "#141416",
-                        border: "1px solid #27272a",
-                        borderRadius: "8px",
-                        padding: "24px",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        minHeight: "140px"
-                      }}
-                      className="badge-item-card"
-                    >
+                    <div key={badge.id} className="mp-badge">
                       <div>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-                          <BadgeIcon badge={badge} monochrome={false} size={32} />
-                          <span style={{ 
-                            fontSize: "11px", 
-                            color: owned ? "#10b981" : "#a1a1aa", 
-                            background: owned ? "rgba(16, 185, 129, 0.08)" : "rgba(255, 255, 255, 0.03)", 
-                            padding: "3px 8px", 
-                            borderRadius: "4px", 
-                            fontWeight: "500" 
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                          <span className="profile-badge" style={{ width: 36, height: 36 }}>
+                            <BadgeIcon badge={badge} monochrome={false} size={18} />
+                          </span>
+                          <span style={{
+                            fontSize: 11,
+                            color: owned ? "#10b981" : "#a1a1aa",
+                            background: "#09090b",
+                            border: "1px solid #27272a",
+                            padding: "3px 8px",
+                            borderRadius: 6,
+                            fontWeight: 500,
                           }}>
-                            {owned ? (earnedViaDiscord ? "Owned (Role)" : "Owned") : `$${price?.toFixed(2)}`}
+                            {owned ? (earnedViaDiscord ? "Owned · role" : "Owned") : `$${price.toFixed(2)}`}
                           </span>
                         </div>
-                        <strong style={{ display: "block", fontSize: "14px", fontWeight: "600", color: "#f4f4f5", marginBottom: "6px" }}>
+                        <strong style={{ display: "block", fontSize: 14, fontWeight: 600, color: "#f4f4f5", marginBottom: 6 }}>
                           {badge.name}
                         </strong>
-                        <p style={{ fontSize: "12px", color: "#71717a", margin: 0, lineHeight: "1.4" }}>
-                          {badge.id === "rich" && "Distinctive styling for contributors and supporters."}
-                          {badge.id === "og" && "Early profile registration badge for pioneers."}
-                          {badge.id === "donor" && "Unlocked badge representing active server funding."}
-                          {badge.id === "premium" && "Premium platform validation status."}
-                          {badge.id === "verified" && "Account authenticity check."}
-                          {badge.id === "winner" && "Commendation for top community status."}
-                          {badge.id === "early_supporter" && "Honoring users who believed in the product early on."}
-                          {badge.id === "bug_hunter" && "For identifying issues and helping secure sob.lol."}
-                          {badge.id === "helper" && "Awarded for supportive community members."}
-                          {badge.id === "staff" && "Exclusively for the official platform team."}
-                          {badge.id === "owner" && "Identifies the core system administration."}
+                        <p style={{ fontSize: 12, color: "#71717a", margin: 0, lineHeight: 1.45 }}>
+                          {descriptions[badge.id] || "A distinctive mark on your profile."}
                         </p>
                       </div>
-
-                      <div style={{ marginTop: "20px" }}>
-                        <button
-                          onClick={() => !owned && handleBuyBadge(badge.id, badge.name)}
-                          disabled={owned}
-                          style={{
-                            width: "100%",
-                            padding: "8px 12px",
-                            borderRadius: "6px",
-                            border: owned ? "1px solid #121214" : "1px solid #27272a",
-                            background: "transparent",
-                            color: owned ? "#3f3f46" : "#f4f4f5",
-                            fontSize: "12px",
-                            fontWeight: "500",
-                            cursor: owned ? "default" : "pointer",
-                            transition: "all 0.15s ease"
-                          }}
-                          onMouseEnter={(e) => {
-                            if (!owned) {
-                              e.currentTarget.style.borderColor = "#55acee";
-                              e.currentTarget.style.backgroundColor = "rgba(85, 172, 238, 0.08)";
-                              e.currentTarget.style.color = "#55acee";
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (!owned) {
-                              e.currentTarget.style.borderColor = "#27272a";
-                              e.currentTarget.style.backgroundColor = "transparent";
-                              e.currentTarget.style.color = "#f4f4f5";
-                            }
-                          }}
-                        >
-                          {owned ? "Owned" : "Acquire Item"}
-                        </button>
-                      </div>
+                      <button
+                        className={owned ? "btn-secondary" : "btn-primary"}
+                        onClick={() => !owned && handleBuyBadge(badge.id, badge.name)}
+                        disabled={owned}
+                        style={{ width: "100%", marginTop: 16, height: 36, opacity: owned ? 0.55 : 1 }}
+                      >
+                        {owned ? "Owned" : "Acquire"}
+                      </button>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </section>
           </div>
 
-          {/* Right Side: Inventory Sticky Panel */}
-          <div className="inventory-col">
-            <div style={{ position: "sticky", top: "40px", padding: "0 0 28px" }}>
-              <h3 style={{ fontSize: "15px", fontWeight: "600", color: "#f4f4f5", margin: "0 0 20px" }}>
-                My Inventory
-              </h3>
+          <aside className="mp-inv">
+            <h3>Your inventory</h3>
 
-              {/* Handles List */}
-              <div style={{ marginBottom: "28px" }}>
-                <h4 style={{ fontSize: "11px", fontWeight: "600", color: "#52525b", letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 12px" }}>
-                  Reserved Handles ({myUsernames.length})
-                </h4>
-                {myUsernames.length === 0 ? (
-                  <div style={{ border: "1px dashed #27272a", borderRadius: "6px", padding: "20px 16px", textAlign: "center" }}>
-                    <p style={{ fontSize: "12px", color: "#52525b", margin: 0 }}>
-                      No premium handles purchased yet.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {myUsernames.map((name) => (
-                      <div 
-                        key={name} 
-                        style={{ 
-                          background: "#141416", 
-                          border: "1px solid #27272a", 
-                          borderRadius: "6px", 
-                          padding: "10px 14px", 
-                          fontSize: "13px", 
-                          fontFamily: "monospace",
-                          color: "#e4e4e7",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center"
-                        }}
-                      >
-                        <span>@{name}</span>
-                        <span style={{ fontSize: "10px", color: "#10b981", background: "rgba(16, 185, 129, 0.08)", padding: "2px 6px", borderRadius: "4px", fontWeight: 500 }}>Active</span>
+            <div style={{ marginBottom: 28 }}>
+              <h4>Handles ({myUsernames.length})</h4>
+              {myUsernames.length === 0 ? (
+                <div className="mp-empty">No premium handles yet.</div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {myUsernames.map((name) => (
+                    <div key={name} className="mp-item" style={{ fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace" }}>
+                      <span>@{name}</span>
+                      <span style={{ fontSize: 11, color: "#10b981" }}>Active</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <h4>Badges ({myBadges.length})</h4>
+              {myBadges.length === 0 ? (
+                <div className="mp-empty">No badges purchased yet.</div>
+              ) : (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {myBadges.map((badgeId) => {
+                    const badge = availableBadges.find((b) => b.id === badgeId);
+                    return (
+                      <div key={badgeId} className="mp-item">
+                        <BadgeIcon badge={badge || { id: badgeId, name: badgeId, icon: "⭐" }} monochrome={false} size={16} />
+                        <span style={{ fontWeight: 500 }}>{badge?.name || badgeId}</span>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Badges List */}
-              <div>
-                <h4 style={{ fontSize: "11px", fontWeight: "600", color: "#52525b", letterSpacing: "0.05em", textTransform: "uppercase", margin: "0 0 12px" }}>
-                  Purchased Badges ({myBadges.length})
-                </h4>
-                {myBadges.length === 0 ? (
-                  <div style={{ border: "1px dashed #27272a", borderRadius: "6px", padding: "20px 16px", textAlign: "center" }}>
-                    <p style={{ fontSize: "12px", color: "#52525b", margin: 0 }}>
-                      No premium badges purchased yet.
-                    </p>
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                    {myBadges.map((badgeId) => {
-                      const badge = availableBadges.find((b) => b.id === badgeId);
-                      return (
-                        <div 
-                          key={badgeId} 
-                          style={{ 
-                            display: "inline-flex", 
-                            alignItems: "center", 
-                            gap: "6px", 
-                            background: "#141416", 
-                            border: "1px solid #27272a", 
-                            borderRadius: "6px", 
-                            padding: "8px 12px", 
-                            fontSize: "12px",
-                            color: "#e4e4e7"
-                          }}
-                        >
-                          <BadgeIcon badge={badge || { id: badgeId, name: badgeId, icon: "⭐" }} monochrome={false} size={16} />
-                          <span style={{ fontWeight: 500 }}>{badge?.name || badgeId}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </div>
-
+          </aside>
         </div>
-
       </div>
     </main>
   );

@@ -1,7 +1,89 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import SiteHeader from "@/components/SiteHeader";
+import BrandMark from "@/components/BrandMark";
+import BadgeIcon from "@/components/BadgeIcon";
+import { DISCORD_INVITE_URL, SITE_NAME } from "@/lib/constants";
+import { Clock, Eye, Heart, MapPin, MessageCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+function MockProfile() {
+  return (
+    <div className="land-preview">
+      <div className="land-preview-label">
+        <span>Preview</span>
+        <span>{SITE_NAME}/luna</span>
+      </div>
+      <article className="profile-card no-banner" style={{ pointerEvents: "none" }}>
+        <div className="profile-body">
+          <div className="profile-avatar-wrap">
+            <div className="profile-avatar" style={{ borderRadius: "50%", fontSize: 34, color: "#a1a1aa" }}>
+              L
+            </div>
+          </div>
+          <h2 className="profile-name">luna</h2>
+          <div className="profile-badges">
+            {[
+              { id: "verified", name: "Verified", icon: "☑️" },
+              { id: "og", name: "OG", icon: "🧍" },
+              { id: "donor", name: "Donor", icon: "💰" },
+            ].map((badge) => (
+              <span key={badge.id} className="profile-badge" title={badge.name}>
+                <BadgeIcon badge={badge} monochrome={false} size={16} />
+              </span>
+            ))}
+          </div>
+          <div className="profile-meta">
+            <span className="profile-handle">@luna</span>
+            <span className="profile-chip">she/they</span>
+          </div>
+          <p className="profile-bio">Designer. Builder. Mostly offline.</p>
+          <p className="profile-location">
+            <MapPin size={13} /> Berlin
+          </p>
+          <div className="profile-tags">
+            <span className="profile-tag">design</span>
+            <span className="profile-tag">music</span>
+            <span className="profile-tag">film</span>
+          </div>
+          <div className="profile-stats">
+            <span className="profile-stat">
+              <Eye size={13} /> 2,418
+            </span>
+            <span className="profile-stat">
+              <Heart size={13} /> 186
+            </span>
+            <span className="profile-stat">Joined Mar 2025</span>
+          </div>
+        </div>
+      </article>
+      <div className="module-card" style={{ marginTop: 10, pointerEvents: "none" }}>
+        <div style={{ position: "relative", width: 40, height: 40, flex: "none" }}>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#18181b", border: "1px solid #27272a" }} />
+          <span style={{ position: "absolute", right: -1, bottom: -1, width: 12, height: 12, borderRadius: "50%", background: "#22c55e", border: "2px solid #141416" }} />
+        </div>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="module-name" style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            luna <span style={{ fontSize: 11, fontWeight: 600, color: "#22c55e" }}>online</span>
+          </div>
+          <div className="module-sub" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <MessageCircle size={13} /> Listening to something quiet
+          </div>
+        </div>
+      </div>
+      <div className="module-card" style={{ marginTop: 10, pointerEvents: "none" }}>
+        <div style={{ width: 40, height: 40, borderRadius: 10, background: "#09090b", border: "1px solid #27272a", display: "grid", placeItems: "center", flex: "none" }}>
+          <Clock size={18} style={{ color: "#a1a1aa" }} />
+        </div>
+        <div>
+          <div className="module-name" style={{ fontVariantNumeric: "tabular-nums" }}>21:04:12</div>
+          <div className="module-sub">Local time</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default async function Home() {
   const supabase = createClient();
@@ -15,168 +97,90 @@ export default async function Home() {
     username = profile?.username || "";
   }
 
+  const name = SITE_NAME.split(".")[0];
+  const tld = SITE_NAME.includes(".") ? `.${SITE_NAME.split(".").slice(1).join(".")}` : "";
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
-        padding: "40px 24px",
-        background: "#09090b",
-        color: "#a1a1aa",
-        fontFamily: "inherit",
-      }}
-    >
-      {/* Brand Logo */}
-      <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em", marginBottom: "40px" }}>
-        sob<span style={{ color: "#55acee" }}>.lol</span>
-      </div>
+    <div className="land">
+      <SiteHeader signedIn={!!user} username={username} />
 
-      {/* Hero Title */}
-      <h1
-        style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: "clamp(38px, 6vw, 56px)",
-          fontWeight: "600",
-          lineHeight: 1.1,
-          color: "#f4f4f5",
-          margin: "0 0 16px",
-          letterSpacing: "-0.03em",
-          maxWidth: 640,
-        }}
-      >
-        One link.
-        <br />
-        <span style={{ color: "#71717a" }}>Everything you are.</span>
-      </h1>
+      <main className="land-main">
+        <section className="land-hero">
+          <div>
+            <p className="land-kicker">Your page on the internet</p>
+            <h1>
+              One link.
+              <br />
+              <span>Everything you are.</span>
+            </h1>
+            <p>
+              {user
+                ? "You’re signed in. Jump back into your dashboard and keep shaping the page."
+                : "Claim a unique name, then put Discord, music, badges, and links on a page people actually want to open."}
+            </p>
 
-      {/* Description */}
-      <p style={{ color: "#71717a", fontSize: "15px", maxWidth: 440, lineHeight: 1.6, margin: "0 0 40px" }}>
-        {user ? (
-          "You are already signed in. Jump straight back into your dashboard."
-        ) : (
-          <>
-            Claim your name before someone else does. Each name can only belong to one person. Check out the{" "}
-            <Link href="/marketplace" style={{ color: "#55acee", fontWeight: "500", textDecoration: "none" }}>
-              Marketplace
-            </Link>{" "}
-            for premium handles.
-          </>
-        )}
-      </p>
+            {user ? (
+              <div className="land-actions">
+                <Link href={username ? "/dashboard" : "/claim"} className="btn-primary">
+                  Open dashboard
+                </Link>
+                <Link href="/marketplace" className="btn-secondary">
+                  Marketplace
+                </Link>
+                {username && (
+                  <Link href={`/${username}`} className="btn-secondary">
+                    View my page
+                  </Link>
+                )}
+              </div>
+            ) : (
+              <>
+                <form action="/signup" method="get" className="claim-form">
+                  <span className="claim-prefix">
+                    {name}
+                    <span style={{ color: "#55acee" }}>{tld}</span>/
+                  </span>
+                  <input name="username" placeholder="yourname" autoComplete="off" aria-label="Username" />
+                  <button type="submit" className="btn-primary" style={{ height: 36, padding: "0 14px" }}>
+                    Claim
+                  </button>
+                </form>
+                <p className="claim-note">
+                  Already have one? <Link href="/login">Log in</Link>
+                </p>
+              </>
+            )}
+          </div>
 
-      {user ? (
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-          <Link 
-            href={username ? "/dashboard" : "/claim"} 
-            style={{ 
-              background: "#ffffff", 
-              color: "#09090b", 
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: "500",
-              padding: "10px 20px",
-              borderRadius: "6px",
-              transition: "background-color 0.15s ease"
-            }}
-          >
-            Open dashboard
-          </Link>
-          <Link 
-            href="/marketplace" 
-            style={{ 
-              background: "transparent", 
-              color: "#f4f4f5", 
-              border: "1px solid #27272a", 
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: "500",
-              padding: "10px 20px",
-              borderRadius: "6px",
-              transition: "border-color 0.15s ease"
-            }}
-          >
-            Marketplace
-          </Link>
-          {username && (
-            <Link 
-              href={`/${username}`} 
-              style={{ 
-                background: "transparent", 
-                color: "#f4f4f5", 
-                border: "1px solid #27272a", 
-                textDecoration: "none",
-                fontSize: "14px",
-                fontWeight: "500",
-                padding: "10px 20px",
-                borderRadius: "6px",
-                transition: "border-color 0.15s ease"
-              }}
-            >
-              View my page
-            </Link>
-          )}
+          <MockProfile />
+        </section>
+
+        <section className="land-points">
+          <div className="land-point">
+            <b>A name that’s yours</b>
+            <span>Every handle is unique. Once you claim it, it stays yours — the kind of URL people remember.</span>
+          </div>
+          <div className="land-point">
+            <b>Discord, live</b>
+            <span>Show status, activity, and role badges so the page feels like you, not a link dump.</span>
+          </div>
+          <div className="land-point">
+            <b>Quiet on purpose</b>
+            <span>No clutter. A profile that looks good sitting in a Discord bio, a tweet, or a resume.</span>
+          </div>
+        </section>
+      </main>
+
+      <footer className="land-footer">
+        <BrandMark />
+        <div style={{ display: "flex", gap: 16 }}>
+          <a href={DISCORD_INVITE_URL} target="_blank" rel="noreferrer">
+            Discord
+          </a>
+          <Link href="/marketplace">Marketplace</Link>
+          <Link href="/login">Log in</Link>
         </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-          <form
-            action="/signup"
-            method="get"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#09090b",
-              border: "1px solid #27272a",
-              borderRadius: 6,
-              padding: 6,
-              width: "min(400px, 100%)",
-            }}
-          >
-            <span style={{ color: "#52525b", paddingLeft: 10, fontSize: 14, fontFamily: "monospace" }}>sob.lol/</span>
-            <input
-              name="username"
-              placeholder="yourname"
-              autoComplete="off"
-              style={{
-                flex: 1,
-                background: "transparent",
-                border: "none",
-                outline: "none",
-                color: "#f4f4f5",
-                fontSize: 14,
-                fontFamily: "monospace",
-              }}
-            />
-            <button 
-              type="submit" 
-              style={{ 
-                background: "#ffffff", 
-                color: "#09090b",
-                border: "none",
-                borderRadius: 4,
-                padding: "8px 16px",
-                fontSize: "13px",
-                fontWeight: "500",
-                cursor: "pointer",
-                transition: "background-color 0.15s ease"
-              }}
-            >
-              Claim
-            </button>
-          </form>
-
-          <p style={{ marginTop: 24, fontSize: 13, color: "#52525b" }}>
-            Already have one?{" "}
-            <Link href="/login" style={{ fontWeight: "500", color: "#a1a1aa", textDecoration: "none" }}>
-              Log in
-            </Link>
-          </p>
-        </div>
-      )}
-    </main>
+      </footer>
+    </div>
   );
 }

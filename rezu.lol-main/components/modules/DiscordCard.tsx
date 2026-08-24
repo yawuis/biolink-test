@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink, Gamepad2, Headphones, MessageCircle, Music, Radio, WifiOff } from "lucide-react";
-import { DISCORD_INVITE_URL, DEFAULT_ACCENT, type Profile } from "@/lib/constants";
-import { card } from "./style";
+import { DISCORD_INVITE_URL, type Profile } from "@/lib/constants";
 
 type BotPresence = {
   ok: boolean;
@@ -21,31 +20,29 @@ type BotPresence = {
 };
 
 const STATUS_COLOR: Record<string, string> = {
-  online: "#43b581",
-  idle: "#faa61a",
-  dnd: "#f04747",
-  offline: "#747f8d",
-  invisible: "#747f8d",
+  online: "#22c55e",
+  idle: "#eab308",
+  dnd: "#ef4444",
+  offline: "#71717a",
+  invisible: "#71717a",
 };
 
-
 function activityIcon(type?: number) {
-  if (type === 2) return <Music size={15} />;
-  if (type === 0) return <Gamepad2 size={15} />;
-  if (type === 3) return <Radio size={15} />;
-  if (type === 4) return <Headphones size={15} />;
-  return <MessageCircle size={15} />;
+  if (type === 2) return <Music size={14} />;
+  if (type === 0) return <Gamepad2 size={14} />;
+  if (type === 3) return <Radio size={14} />;
+  if (type === 4) return <Headphones size={14} />;
+  return <MessageCircle size={14} />;
 }
 
 function activityText(data?: BotPresence) {
   const first = data?.activities?.find((item) => item.name && item.name !== "Custom Status") || data?.activities?.[0];
-  if (!first) return data?.status === "offline" ? "Offline" : "Doing nothing";
-  const bottom = [first.details, first.state].filter(Boolean).join(" • ");
+  if (!first) return data?.status === "offline" ? "Offline" : "Online";
+  const bottom = [first.details, first.state].filter(Boolean).join(" · ");
   return bottom ? `${first.name} — ${bottom}` : first.name;
 }
 
 export default function DiscordCard({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
   const invite = DISCORD_INVITE_URL;
   const [data, setData] = useState<BotPresence | null>(null);
   const [loading, setLoading] = useState(false);
@@ -59,7 +56,7 @@ export default function DiscordCard({ profile }: { profile: Profile }) {
         const res = await fetch(`/api/discord/presence/${profile.discord_id}`, { cache: "no-store" });
         const json = await res.json();
         if (alive) setData(json);
-      } catch (error) {
+      } catch {
         if (alive) setData({ ok: false, error: "Presence API offline" });
       } finally {
         if (alive) setLoading(false);
@@ -81,48 +78,61 @@ export default function DiscordCard({ profile }: { profile: Profile }) {
   if (!profile.discord_id) {
     if (!profile.discord_enabled) return null;
     return (
-      <a href={invite} target="_blank" rel="noreferrer" style={{ ...card(accent), display: "flex", alignItems: "center", gap: 14, color: "#e8e8ef", textDecoration: "none" }}>
-        <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${accent}22`, border: `1px solid ${accent}55`, display: "grid", placeItems: "center" }}>
-          <MessageCircle size={25} style={{ color: accent }} />
+      <a href={invite} target="_blank" rel="noreferrer" className="module-card">
+        <div style={{ width: 44, height: 44, borderRadius: 10, background: "#09090b", border: "1px solid #27272a", display: "grid", placeItems: "center", flex: "none" }}>
+          <MessageCircle size={20} style={{ color: "#55acee" }} />
         </div>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontWeight: 900, fontSize: 16 }}>Join for Discord presence</div>
-          <div style={{ fontSize: 13, color: "#c5c5d2" }}>Join the official server, then link your Discord.</div>
+          <div className="module-name">Join for Discord presence</div>
+          <div className="module-sub">Link Discord, then your status shows here.</div>
         </div>
-        <ExternalLink size={15} style={{ color: "#a9a9b5" }} />
+        <ExternalLink size={14} style={{ color: "#71717a" }} />
       </a>
     );
   }
 
   if (!data?.ok || !data.joined) {
     return (
-      <a href={invite} target="_blank" rel="noreferrer" style={{ ...card(accent), display: "flex", alignItems: "center", gap: 14, textDecoration: "none", color: "#e8e8ef" }}>
-        <WifiOff size={27} style={{ color: accent }} />
+      <a href={invite} target="_blank" rel="noreferrer" className="module-card">
+        <WifiOff size={22} style={{ color: "#a1a1aa", flex: "none" }} />
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 900 }}>{loading ? "Checking Discord..." : "Join the Discord to show presence"}</div>
-          <div style={{ fontSize: 13, color: "#c5c5d2" }}>{data?.error || "Join the official Discord and your status will appear here."}</div>
+          <div className="module-name">{loading ? "Checking Discord…" : "Join the Discord to show presence"}</div>
+          <div className="module-sub">{data?.error || "Join the official server and your status appears here."}</div>
         </div>
       </a>
     );
   }
 
   return (
-    <div style={{ ...card(accent), display: "flex", alignItems: "center", justifyContent: "center", gap: 14, color: "#e8e8ef", width: "100%" }}>
-      <div style={{ position: "relative", width: 62, height: 62, flex: "0 0 auto", display: "grid", placeItems: "center" }}>
+    <div className="module-card">
+      <div style={{ position: "relative", width: 48, height: 48, flex: "none" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={avatar} alt="" style={{ width: 54, height: 54, borderRadius: "50%", objectFit: "cover", display: "block", position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)" }} />
+        <img src={avatar} alt="" style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", display: "block", border: "1px solid #27272a" }} />
         {data.user?.avatar_decoration_url && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.user.avatar_decoration_url} alt="" style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: 76, height: 76, objectFit: "contain", pointerEvents: "none", zIndex: 2 }} />
+          <img src={data.user.avatar_decoration_url} alt="" style={{ position: "absolute", inset: -8, width: 64, height: 64, objectFit: "contain", pointerEvents: "none" }} />
         )}
-        <span style={{ position: "absolute", right: 3, bottom: 4, width: 16, height: 16, borderRadius: "50%", background: STATUS_COLOR[status] || STATUS_COLOR.offline, border: "3px solid #141416", zIndex: 3 }} />
+        <span
+          style={{
+            position: "absolute",
+            right: -1,
+            bottom: -1,
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            background: STATUS_COLOR[status] || STATUS_COLOR.offline,
+            border: "2px solid #141416",
+          }}
+        />
       </div>
       <div style={{ textAlign: "left", minWidth: 0, flex: 1 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <strong style={{ fontSize: 16, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</strong>
-          <span style={{ fontSize: 11, textTransform: "uppercase", color: STATUS_COLOR[status] || STATUS_COLOR.offline, fontWeight: 900 }}>{status}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <strong className="module-name">{name}</strong>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: "capitalize", color: STATUS_COLOR[status] || STATUS_COLOR.offline }}>
+            {status}
+          </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 13, color: "#c5c5d2", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", marginTop: 4 }}>
+        <div className="module-sub" style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {activityIcon(firstActivity?.type)}
           <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{activityText(data)}</span>
         </div>

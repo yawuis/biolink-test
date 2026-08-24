@@ -110,18 +110,6 @@ export default function Effects({ accent, effect, cursor }: Props) {
         ref={canvasRef}
         style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }}
       />
-      {effect === "glow" && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 1,
-            background: `radial-gradient(circle at 50% 40%, ${accent}22, transparent 60%)`,
-            animation: "glow 5s ease-in-out infinite",
-          }}
-        />
-      )}
     </>
   );
 }

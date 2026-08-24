@@ -87,7 +87,7 @@ export default function BadgeIcon({
       strokeWidth={2.25}
       color={iconColor}
       style={{
-        filter: glow ? `drop-shadow(0 0 7px ${iconColor})` : "none",
+        filter: "none",
         flex: "none",
       }}
     />

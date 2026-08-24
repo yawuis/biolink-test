@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Music, ExternalLink } from "lucide-react";
-import { DEFAULT_ACCENT, type Profile } from "@/lib/constants";
-import { card } from "./style";
+import { type Profile } from "@/lib/constants";
 
 type SpotifyEmbed = { title?: string; thumbnail_url?: string; provider_name?: string };
 
@@ -19,7 +18,6 @@ function trackId(url: string) {
 }
 
 export default function SpotifyCard({ profile }: { profile: Profile }) {
-  const accent = profile.accent || DEFAULT_ACCENT;
   const url = cleanUrl(profile.spotify_url);
   const [embed, setEmbed] = useState<SpotifyEmbed | null>(null);
   const [failed, setFailed] = useState(false);
@@ -51,21 +49,21 @@ export default function SpotifyCard({ profile }: { profile: Profile }) {
   const subtitle = profile.spotify_artist?.trim() || autoDescription;
 
   return (
-    <a href={url} target="_blank" rel="noreferrer" style={{ ...card(accent), display: "flex", alignItems: "center", gap: 14, textDecoration: "none", color: "#e8e8ef" }}>
-      <div style={{ width: 54, height: 54, borderRadius: 12, overflow: "hidden", background: "#101016", display: "grid", placeItems: "center", border: "1px solid #ffffff12" }}>
+    <a href={url} target="_blank" rel="noreferrer" className="module-card">
+      <div style={{ width: 48, height: 48, borderRadius: 8, overflow: "hidden", background: "#09090b", display: "grid", placeItems: "center", border: "1px solid #27272a", flex: "none" }}>
         {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={cover} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         ) : (
-          <Music size={25} style={{ color: accent }} />
+          <Music size={20} style={{ color: "#a1a1aa" }} />
         )}
       </div>
       <div style={{ textAlign: "left", minWidth: 0, flex: 1 }}>
-        <div style={{ fontSize: 11, color: accent, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".08em" }}>Spotify</div>
-        <div style={{ fontWeight: 900, fontSize: 16, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{title}</div>
-        <div style={{ fontSize: 13, color: "#c5c5d2", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{subtitle}</div>
+        <div className="module-kicker">Spotify</div>
+        <div className="module-name">{title}</div>
+        <div className="module-sub">{subtitle}</div>
       </div>
-      <ExternalLink size={15} style={{ color: "#a9a9b5" }} />
+      <ExternalLink size={14} style={{ color: "#71717a", flex: "none" }} />
     </a>
   );
 }
