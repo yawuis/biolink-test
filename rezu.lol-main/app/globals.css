@@ -530,12 +530,23 @@ select {
   padding: 40px 20px;
   background: var(--bg);
 }
+@keyframes profile-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 .profile-stack {
   position: relative;
   z-index: 3;
   width: 100%;
   display: grid;
   gap: 10px;
+  animation: profile-entrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 .profile-card {
   width: 100%;
@@ -1065,4 +1076,33 @@ a.module-card:hover {
 @media (max-width: 620px) {
   .site-header-nav > a:not(.btn-primary) { display: none; }
   .claim-form { width: 100%; }
+}
+
+/* CRT/Glitch Screen Overlay Effect */
+.crt-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.18) 50%
+  );
+  background-size: 100% 4px;
+  animation: crt-flicker 0.15s infinite;
+}
+.crt-overlay::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.12) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 10000;
+  background-size: 100% 3px, 3px 100%;
+  pointer-events: none;
+}
+@keyframes crt-flicker {
+  0% { opacity: 0.97; }
+  50% { opacity: 1; }
+  100% { opacity: 0.97; }
 }

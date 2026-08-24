@@ -13,16 +13,16 @@ function MockProfile() {
     <div className="land-preview">
       <div className="land-preview-label">
         <span>Preview</span>
-        <span>{SITE_NAME}/luna</span>
+        <span>{SITE_NAME}/pluto</span>
       </div>
       <article className="profile-card no-banner has-modules" style={{ pointerEvents: "none" }}>
         <div className="profile-body">
           <div className="profile-avatar-wrap">
             <div className="profile-avatar" style={{ borderRadius: "50%", fontSize: 34, color: "#a1a1aa" }}>
-              L
+              P
             </div>
           </div>
-          <h2 className="profile-name">luna</h2>
+          <h2 className="profile-name">pluto</h2>
           <div className="profile-badges">
             {[
               { id: "verified", name: "Verified", icon: "☑️" },
@@ -35,8 +35,8 @@ function MockProfile() {
             ))}
           </div>
           <div className="profile-meta">
-            <span className="profile-handle">@luna</span>
-            <span className="profile-chip">she/they</span>
+            <span className="profile-handle">@pluto</span>
+            <span className="profile-chip">he/him</span>
           </div>
           <p className="profile-bio">Designer. Builder. Mostly offline.</p>
           <p className="profile-location">
@@ -65,7 +65,7 @@ function MockProfile() {
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div className="module-name" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                luna <span style={{ fontSize: 11, fontWeight: 600, color: "#22c55e" }}>online</span>
+                pluto <span style={{ fontSize: 11, fontWeight: 600, color: "#22c55e" }}>online</span>
               </div>
               <div className="module-sub" style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <MessageCircle size={13} /> Listening to something quiet

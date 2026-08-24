@@ -110,6 +110,7 @@ export default function Effects({ accent, effect, cursor }: Props) {
         ref={canvasRef}
         style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 2 }}
       />
+      {effect === "crt" && <div className="crt-overlay" />}
     </>
   );
 }

@@ -5,7 +5,7 @@ export const BACKGROUNDS: Record<string, string> = {
   void: "#09090b",
 };
 
-export const EFFECTS = ["none", "particles", "glow", "snow", "rain"] as const;
+export const EFFECTS = ["none", "particles", "glow", "snow", "rain", "crt"] as const;
 export const CURSORS = ["none", "trail", "dot", "particles"] as const;
 export const LAYOUTS = ["classic", "portfolio", "scroll", "compact", "minimal", "banner"] as const;
 export const AVATAR_SHAPES = ["circle", "rounded", "square", "hexagon", "star"] as const;

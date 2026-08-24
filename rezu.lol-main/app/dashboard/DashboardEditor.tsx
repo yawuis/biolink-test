@@ -147,6 +147,7 @@ const SEARCH_INDEX: SearchResult[] = [
   { label: "Profile opacity", sub: "How transparent the card is", tab: "customize", anchor: "s-general" },
   { label: "Profile blur", sub: "Blur amount on profile card", tab: "customize", anchor: "s-general" },
   { label: "Background effect", sub: "Blurred / darken / none", tab: "customize", anchor: "s-general" },
+  { label: "Screen effect", sub: "None / particles / crt", tab: "customize", anchor: "s-general" },
   { label: "Username effect", sub: "Glow, sparkle, typewriter", tab: "customize", anchor: "s-general" },
   { label: "Layout", sub: "Classic, portfolio, scroll etc.", tab: "customize", anchor: "s-general" },
   { label: "Avatar shape", sub: "Circle, rounded, hexagon", tab: "customize", anchor: "s-general" },
@@ -541,6 +542,7 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
             <Range label="Profile Opacity" value={p.profile_opacity ?? 70} min={0} max={100} onChange={(v) => update({ profile_opacity: v })} />
             <Range label="Profile Blur" value={p.profile_blur ?? 22} min={0} max={100} onChange={(v) => update({ profile_blur: v })} />
             <SelectField label="Background Effect" value={p.background_effect || "blurred"} options={["none", "blurred", "darken"]} onChange={(v) => update({ background_effect: v })} />
+            <SelectField label="Screen Effect" value={p.effect || "none"} options={["none", "particles", "crt"]} onChange={(v) => update({ effect: v })} />
             <SelectField label="Username Effect" value={p.username_effect || "none"} options={["none", "glow", "sparkle", "typewriter"]} onChange={(v) => update({ username_effect: v })} />
             <SelectField label="Layout" value={p.layout || "classic"} options={["classic", "portfolio", "scroll", "compact", "minimal", "banner"]} onChange={(v) => update({ layout: v })} />
             <SelectField label="Avatar Shape" value={p.avatar_shape || "circle"} options={[...AVATAR_SHAPES]} onChange={(v) => update({ avatar_shape: v })} />
@@ -1149,6 +1151,7 @@ const TEMPLATE_STYLE_KEYS: (keyof Profile)[] = [
   "monochrome_icons",
   "animated_title",
   "badges_glow",
+  "effect",
   "username_effect",
   "background_effect",
   "cursor_effect",
