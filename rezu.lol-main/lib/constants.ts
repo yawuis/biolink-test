@@ -237,7 +237,8 @@ export const PREMIUM_3_LETTER_USERNAMES = new Set([
   "dev", "vip", "ceo", "lol", "app", "bot", "btc", "eth", "sol", "nft", 
   "pro", "fun", "wtf", "wow", "god", "sad", "bad", "run", "fly", "win", 
   "out", "new", "old", "use", "get", "set", "key", "api", "web", "dns", 
-  "git", "hub", "sql", "pay", "usd", "ltd", "gem", "one", "yes", "top"
+  "git", "hub", "sql", "pay", "usd", "ltd", "gem", "one", "yes", "top",
+  "uzi"
 ]);
 
 export function isPremiumUsername(username: string): boolean {

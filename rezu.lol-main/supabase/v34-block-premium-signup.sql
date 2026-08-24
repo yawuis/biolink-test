@@ -33,7 +33,8 @@ begin
     'dev', 'vip', 'ceo', 'lol', 'app', 'bot', 'btc', 'eth', 'sol', 'nft', 
     'pro', 'fun', 'wtf', 'wow', 'god', 'sad', 'bad', 'run', 'fly', 'win', 
     'out', 'new', 'old', 'use', 'get', 'set', 'key', 'api', 'web', 'dns', 
-    'git', 'hub', 'sql', 'pay', 'usd', 'ltd', 'gem', 'one', 'yes', 'top'
+    'git', 'hub', 'sql', 'pay', 'usd', 'ltd', 'gem', 'one', 'yes', 'top',
+    'uzi'
   )) then
     raise exception 'Premium handle. Register a standard name first, then purchase this name in the Marketplace.';
   end if;
