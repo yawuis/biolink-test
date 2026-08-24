@@ -16,6 +16,9 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     return NextResponse.json({ ok: false, error: "Invalid Discord user ID" }, { status: 400 });
   }
 
+  console.log("DEBUG: DISCORD_PRESENCE_API_URL =", base);
+  console.log("DEBUG: DISCORD_PRESENCE_API_KEY =", key ? "present" : "missing");
+
   if (!base) {
     return NextResponse.json({ ok: false, error: "Discord presence bot API is not configured" }, { status: 503 });
   }
@@ -28,10 +31,16 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     return NextResponse.json({ ok: false, error: "Invalid presence bot URL configuration" }, { status: 500 });
   }
 
-  const res = await fetch(url, {
-    headers: key ? { "x-api-key": key } : {},
-    next: { revalidate: 8 },
-  });
+  let res;
+  try {
+    res = await fetch(url, {
+      headers: key ? { "x-api-key": key } : {},
+      next: { revalidate: 8 },
+    });
+  } catch (err: any) {
+    console.error("DEBUG: Fetch failed:", err?.message || err);
+    return NextResponse.json({ ok: false, error: `Bot request failed: ${err?.message || err}` }, { status: 502 });
+  }
 
   const data = await res.json().catch(() => ({ ok: false, error: "Bad bot response" }));
   return NextResponse.json(data, { status: res.status });
