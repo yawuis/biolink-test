@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Check, X, Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { makeAuthCallbackUrl } from "@/lib/site-url";
-import { USERNAME_RE, DEFAULT_ACCENT, SITE_NAME } from "@/lib/constants";
+import { USERNAME_RE, SITE_NAME } from "@/lib/constants";
 import DiscordButton from "@/components/DiscordButton";
 
 export default function SignupForm({ initialUsername }: { initialUsername: string }) {
@@ -71,9 +71,6 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
       return setError(msg);
     }
 
-    // If email confirmation is ON in Supabase, there is no logged-in session yet.
-    // The SQL trigger in supabase/v6-auth-fix.sql reserves the username as soon as
-    // the auth user is created, then /auth/callback logs them in after verification.
     if (!signUp.session) {
       setLoading(false);
       setNotice("Check your email and click the verification link. After it opens, you will be sent to your dashboard.");
@@ -85,103 +82,138 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
   };
 
   return (
-    <main style={shell}>
-      <div style={card}>
-        <h1 style={title}>Claim your name</h1>
+    <main style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, background: "#050507", fontFamily: "inherit" }}>
+      <div style={{ width: "min(380px, 100%)", background: "#09090b", border: "1px solid #18181b", borderRadius: 8, padding: "36px 30px" }}>
+        
+        {/* Brand Logo */}
+        <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em", textAlign: "center", marginBottom: "28px" }}>
+          rezu<span style={{ color: "#e11d2e" }}>.lol</span>
+        </div>
+
+        <h1 style={{ fontSize: 20, fontWeight: 600, color: "#f4f4f5", textAlign: "center", margin: "0 0 20px", letterSpacing: "-0.02em" }}>
+          Claim your name
+        </h1>
 
         <DiscordButton mode="signup" />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0", color: "#555", fontSize: 12 }}>
-          <div style={{ flex: 1, height: 1, background: "#20202c" }} /> or email <div style={{ flex: 1, height: 1, background: "#20202c" }} />
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "24px 0", color: "#3f3f46", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ flex: 1, height: 1, background: "#18181b" }} /> 
+          or email 
+          <div style={{ flex: 1, height: 1, background: "#18181b" }} />
         </div>
 
-        <label className="lbl">Username</label>
-        <div style={{ position: "relative" }}>
-          <span style={prefix}>{SITE_NAME}/</span>
-          <input
-            className="field"
-            style={{ paddingLeft: 76 }}
-            value={username}
-            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
-            placeholder="yourname"
-            autoFocus
+        {/* Username Field */}
+        <div style={{ marginBottom: "14px" }}>
+          <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: "500", marginBottom: "6px" }}>Username</label>
+          <div style={{ position: "relative", display: "flex", alignItems: "center", background: "#040405", border: "1px solid #27272a", borderRadius: "6px", width: "100%" }}>
+            <span style={{ paddingLeft: "12px", color: "#52525b", fontSize: "14px", userSelect: "none", fontFamily: "monospace" }}>
+              {SITE_NAME}/
+            </span>
+            <input
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "#f4f4f5",
+                fontSize: "14px",
+                fontFamily: "monospace",
+                padding: "10px 40px 10px 4px",
+                width: "100%",
+                outline: "none"
+              }}
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))}
+              placeholder="yourname"
+              autoFocus
+            />
+            <span style={{ position: "absolute", right: "12px", display: "flex", alignItems: "center" }}>
+              {status === "checking" && <Loader2 size={15} className="spin" style={{ color: "#71717a" }} />}
+              {status === "free" && <Check size={15} style={{ color: "#10b981" }} />}
+              {(status === "taken" || status === "invalid") && <X size={15} style={{ color: "#ef4444" }} />}
+            </span>
+          </div>
+          <div style={{ minHeight: 18, fontSize: 12, marginTop: 6, color: status === "free" ? "#10b981" : "#ef4444" }}>
+            {status === "free" && "Available ✓"}
+            {status === "taken" && "Already claimed"}
+            {status === "invalid" && "1–20 lowercase letters, numbers, or _"}
+          </div>
+        </div>
+
+        {/* Email Field */}
+        <div style={{ marginBottom: "14px" }}>
+          <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: "500", marginBottom: "6px" }}>Email</label>
+          <input 
+            type="email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            style={{
+              width: "100%",
+              background: "#040405",
+              border: "1px solid #27272a",
+              borderRadius: "6px",
+              padding: "10px 12px",
+              color: "#f4f4f5",
+              fontSize: "14px",
+              outline: "none",
+              boxSizing: "border-box"
+            }}
           />
-          <span style={hint}>
-            {status === "checking" && <Loader2 size={16} className="spin" style={{ color: "#6b6b7b" }} />}
-            {status === "free" && <Check size={16} style={{ color: "#4ade80" }} />}
-            {(status === "taken" || status === "invalid") && <X size={16} style={{ color: "#f87171" }} />}
-          </span>
-        </div>
-        <div style={{ minHeight: 18, fontSize: 12, marginTop: 5, color: status === "free" ? "#4ade80" : "#f87171" }}>
-          {status === "free" && "Available ✓"}
-          {status === "taken" && "Already claimed"}
-          {status === "invalid" && "1–20 lowercase letters, numbers, or _"}
         </div>
 
-        <label className="lbl" style={{ marginTop: 8 }}>Email</label>
-        <input className="field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-
-        <label className="lbl" style={{ marginTop: 14 }}>Password</label>
-        <input className="field" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && submit()} />
+        {/* Password Field */}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", fontSize: "12px", color: "#71717a", fontWeight: "500", marginBottom: "6px" }}>Password</label>
+          <input 
+            type="password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            onKeyDown={(e) => e.key === "Enter" && submit()} 
+            style={{
+              width: "100%",
+              background: "#040405",
+              border: "1px solid #27272a",
+              borderRadius: "6px",
+              padding: "10px 12px",
+              color: "#f4f4f5",
+              fontSize: "14px",
+              outline: "none",
+              boxSizing: "border-box"
+            }}
+          />
+        </div>
 
         {notice && (
-          <p style={{ color: "#4ade80", fontSize: 13, marginTop: 12, display: "flex", gap: 8, alignItems: "center" }}>
-            <MailCheck size={16} /> {notice}
+          <p style={{ color: "#10b981", fontSize: 13, marginTop: 12, marginBottom: 12, display: "flex", gap: 8, alignItems: "center", lineHeight: 1.4 }}>
+            <MailCheck size={16} style={{ flexShrink: 0 }} /> {notice}
           </p>
         )}
-        {error && <p style={{ color: "#f87171", fontSize: 13, marginTop: 12 }}>{error}</p>}
+        {error && <p style={{ color: "#ef4444", fontSize: 13, marginTop: 12, marginBottom: 12, textAlign: "center", lineHeight: 1.4 }}>{error}</p>}
 
         <button
-          className="btn"
           onClick={submit}
           disabled={loading || status === "taken" || status === "checking"}
-          style={{ background: "#e11d2e", color: "#fff", width: "100%", marginTop: 18 }}
+          style={{ 
+            background: "#ffffff", 
+            color: "#09090b", 
+            width: "100%", 
+            border: "none", 
+            borderRadius: "6px", 
+            padding: "10px 16px",
+            fontSize: "13px",
+            fontWeight: "500",
+            cursor: "pointer",
+            transition: "background-color 0.15s ease"
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#e4e4e7")}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#ffffff")}
         >
           {loading ? "Creating…" : "Create my page"}
         </button>
 
-        <p style={{ marginTop: 18, fontSize: 14, color: "#6b6b7b", textAlign: "center" }}>
-          Already have one? <Link href="/login" style={{ fontWeight: 600 }}>Log in</Link>
+        <p style={{ marginTop: 24, fontSize: 13, color: "#52525b", textAlign: "center" }}>
+          Already have one? <Link href="/login" style={{ fontWeight: "500", color: "#a1a1aa", textDecoration: "none" }}>Log in</Link>
         </p>
       </div>
       <style>{`.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </main>
   );
 }
-
-const shell: React.CSSProperties = {
-  minHeight: "100vh",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 24,
-  background: "radial-gradient(circle at 15% 0%, rgba(225,29,47,.18), #050505 58%)",
-};
-const card: React.CSSProperties = {
-  width: "min(400px, 100%)",
-  background: "#0a0a0f",
-  border: "1px solid #1c1c22",
-  borderRadius: 18,
-  padding: 28,
-};
-const title: React.CSSProperties = {
-  fontFamily: "'Space Grotesk', sans-serif",
-  fontSize: 24,
-  fontWeight: 700,
-  margin: "0 0 20px",
-};
-const prefix: React.CSSProperties = {
-  position: "absolute",
-  left: 12,
-  top: "50%",
-  transform: "translateY(-50%)",
-  color: "#6b6b7b",
-  fontSize: 13,
-  pointerEvents: "none",
-};
-const hint: React.CSSProperties = {
-  position: "absolute",
-  right: 12,
-  top: "50%",
-  transform: "translateY(-50%)",
-  display: "flex",
-};

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -25,40 +24,43 @@ export default async function Home() {
         alignItems: "center",
         justifyContent: "center",
         textAlign: "center",
-        padding: "24px",
-        background: "radial-gradient(circle at 50% 0%, rgba(225,29,47,.18), #050507 60%)",
+        padding: "40px 24px",
+        background: "#050507",
+        color: "#a1a1aa",
+        fontFamily: "inherit",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 26 }}>
-        <Sparkles size={22} style={{ color: "#e11d2f" }} />
-        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 18 }}>
-          rezu<span style={{ color: "#e11d2f" }}>.lol</span>
-        </span>
+      {/* Brand Logo */}
+      <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em", marginBottom: "40px" }}>
+        rezu<span style={{ color: "#e11d2e" }}>.lol</span>
       </div>
 
+      {/* Hero Title */}
       <h1
         style={{
           fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: "clamp(34px, 7vw, 60px)",
-          fontWeight: 700,
-          lineHeight: 1.05,
-          margin: "0 0 14px",
-          letterSpacing: "-0.02em",
-          maxWidth: 720,
+          fontSize: "clamp(38px, 6vw, 56px)",
+          fontWeight: "600",
+          lineHeight: 1.1,
+          color: "#f4f4f5",
+          margin: "0 0 16px",
+          letterSpacing: "-0.03em",
+          maxWidth: 640,
         }}
       >
         One link.
         <br />
-        <span style={{ color: "#e11d2f" }}>Everything you are.</span>
+        <span style={{ color: "#71717a" }}>Everything you are.</span>
       </h1>
 
-      <p style={{ color: "#9a9aaa", fontSize: 17, maxWidth: 440, margin: "0 0 34px" }}>
+      {/* Description */}
+      <p style={{ color: "#71717a", fontSize: "15px", maxWidth: 440, lineHeight: 1.6, margin: "0 0 40px" }}>
         {user ? (
           "You are already signed in. Jump straight back into your dashboard."
         ) : (
           <>
             Claim your name before someone else does. Each name can only belong to one person. Check out the{" "}
-            <Link href="/marketplace" style={{ color: "#e11d2e", fontWeight: 600 }}>
+            <Link href="/marketplace" style={{ color: "#e11d2e", fontWeight: "500", textDecoration: "none" }}>
               Marketplace
             </Link>{" "}
             for premium handles.
@@ -68,20 +70,58 @@ export default async function Home() {
 
       {user ? (
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-          <Link href={username ? "/dashboard" : "/claim"} className="btn" style={{ background: "#e11d2f", color: "#fff", textDecoration: "none" }}>
+          <Link 
+            href={username ? "/dashboard" : "/claim"} 
+            style={{ 
+              background: "#ffffff", 
+              color: "#09090b", 
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              padding: "10px 20px",
+              borderRadius: "6px",
+              transition: "background-color 0.15s ease"
+            }}
+          >
             Open dashboard
           </Link>
-          <Link href="/marketplace" className="btn" style={{ background: "#15151b", color: "#fff", border: "1px solid #24242c", textDecoration: "none" }}>
+          <Link 
+            href="/marketplace" 
+            style={{ 
+              background: "transparent", 
+              color: "#f4f4f5", 
+              border: "1px solid #18181b", 
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: "500",
+              padding: "10px 20px",
+              borderRadius: "6px",
+              transition: "border-color 0.15s ease"
+            }}
+          >
             Marketplace
           </Link>
           {username && (
-            <Link href={`/${username}`} className="btn" style={{ background: "#15151b", color: "#fff", border: "1px solid #24242c", textDecoration: "none" }}>
+            <Link 
+              href={`/${username}`} 
+              style={{ 
+                background: "transparent", 
+                color: "#f4f4f5", 
+                border: "1px solid #18181b", 
+                textDecoration: "none",
+                fontSize: "14px",
+                fontWeight: "500",
+                padding: "10px 20px",
+                borderRadius: "6px",
+                transition: "border-color 0.15s ease"
+              }}
+            >
               View my page
             </Link>
           )}
         </div>
       ) : (
-        <>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
           <form
             action="/signup"
             method="get"
@@ -89,14 +129,14 @@ export default async function Home() {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              background: "#0d0d13",
-              border: "1px solid #20202c",
-              borderRadius: 14,
-              padding: 8,
-              width: "min(440px, 100%)",
+              background: "#09090b",
+              border: "1px solid #18181b",
+              borderRadius: 6,
+              padding: 6,
+              width: "min(400px, 100%)",
             }}
           >
-            <span style={{ color: "#6b6b7b", paddingLeft: 8, fontSize: 15 }}>rezu.lol/</span>
+            <span style={{ color: "#52525b", paddingLeft: 10, fontSize: 14, fontFamily: "monospace" }}>rezu.lol/</span>
             <input
               name="username"
               placeholder="yourname"
@@ -106,22 +146,36 @@ export default async function Home() {
                 background: "transparent",
                 border: "none",
                 outline: "none",
-                color: "#e8e8ef",
-                fontSize: 15,
+                color: "#f4f4f5",
+                fontSize: 14,
+                fontFamily: "monospace",
               }}
             />
-            <button type="submit" className="btn" style={{ background: "#e11d2f", color: "#fff" }}>
+            <button 
+              type="submit" 
+              style={{ 
+                background: "#ffffff", 
+                color: "#09090b",
+                border: "none",
+                borderRadius: 4,
+                padding: "8px 16px",
+                fontSize: "13px",
+                fontWeight: "500",
+                cursor: "pointer",
+                transition: "background-color 0.15s ease"
+              }}
+            >
               Claim
             </button>
           </form>
 
-          <p style={{ marginTop: 22, fontSize: 14, color: "#6b6b7b" }}>
+          <p style={{ marginTop: 24, fontSize: 13, color: "#52525b" }}>
             Already have one?{" "}
-            <Link href="/login" style={{ fontWeight: 600 }}>
+            <Link href="/login" style={{ fontWeight: "500", color: "#a1a1aa", textDecoration: "none" }}>
               Log in
             </Link>
           </p>
-        </>
+        </div>
       )}
     </main>
   );
