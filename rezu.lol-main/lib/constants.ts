@@ -241,23 +241,27 @@ export function isPremiumUsername(username: string): boolean {
 }
 
 export const MARKETPLACE_BADGES: BadgeItem[] = [
-  { id: "gold_crown", name: "Gold Crown", icon: "👑", custom: true },
-  { id: "star_player", name: "Star Player", icon: "⭐", custom: true },
-  { id: "flame_active", name: "On Fire", icon: "🔥", custom: true },
-  { id: "shield_protect", name: "Shield", icon: "🛡️", custom: true },
-  { id: "gem_collector", name: "Gem Collector", icon: "💎", custom: true },
-  { id: "heart_supporter", name: "Supporter", icon: "❤️", custom: true },
+  { id: "rich", name: "Rich", icon: "🚀", custom: true },
+  { id: "og", name: "OG", icon: "🧍", custom: true },
+  { id: "donor", name: "Donor", icon: "💰", custom: true },
+  { id: "premium", name: "Premium", icon: "💎", custom: true },
+  { id: "verified", name: "Verified", icon: "☑️", custom: true },
+  { id: "winner", name: "Winner", icon: "🏆", custom: true },
+  { id: "early", name: "Early Supporter", icon: "💸", custom: true },
+  { id: "bug", name: "Bug Hunter", icon: "🐛", custom: true },
 ];
 
 export const MARKETPLACE_PRICES: Record<string, number> = {
   username_1_letter: 199.00,
   username_2_letter: 99.00,
   username_3_letter: 49.00,
-  gold_crown: 15.00,
-  star_player: 10.00,
-  flame_active: 8.00,
-  shield_protect: 5.00,
-  gem_collector: 12.00,
-  heart_supporter: 3.00,
+  rich: 50.00,
+  og: 20.00,
+  donor: 25.00,
+  premium: 15.00,
+  verified: 10.00,
+  winner: 30.00,
+  early: 10.00,
+  bug: 15.00,
 };
 

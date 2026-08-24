@@ -5,7 +5,7 @@ import { Eye, MapPin } from "lucide-react";
 import { PLATFORMS } from "./platforms";
 import BrandIcon from "./BrandIcon";
 import BadgeIcon from "./BadgeIcon";
-import { BACKGROUNDS, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile } from "@/lib/constants";
+import { BACKGROUNDS, badgesFromDiscordRoleIds, milestoneBadgesForProfile, type BadgeItem, type Profile, MARKETPLACE_BADGES } from "@/lib/constants";
 import DiscordCard from "./modules/DiscordCard";
 import GithubCard from "./modules/GithubCard";
 import SpotifyCard from "./modules/SpotifyCard";
@@ -163,7 +163,22 @@ function BadgeStrip({ profile }: { profile: Profile }) {
   const hiddenBadgeIds = new Set((profile.badges || []).filter((b) => b.enabled === false).map((b) => b.id));
   const customBadges = (profile.badges || []).filter((b) => b.id?.startsWith("custom-") && b.enabled !== false);
   const milestoneBadges = milestoneBadgesForProfile(profile).filter((badge) => !hiddenBadgeIds.has(badge.id));
-  const badges = [...roleBadges.filter((badge) => !hiddenBadgeIds.has(badge.id)), ...milestoneBadges, ...customBadges];
+
+  // Load purchased marketplace badges
+  const ownedBadgeIds = Array.isArray(profile.owned_badges) ? profile.owned_badges.map(String) : [];
+  const purchasedBadges = MARKETPLACE_BADGES.filter((mb) => ownedBadgeIds.includes(mb.id));
+
+  // Merge and deduplicate by badge ID
+  const allBadgesList = [...roleBadges, ...milestoneBadges, ...purchasedBadges, ...customBadges];
+  const seenIds = new Set<string>();
+  const badges: BadgeItem[] = [];
+  for (const b of allBadgesList) {
+    if (!b.id || seenIds.has(b.id)) continue;
+    if (hiddenBadgeIds.has(b.id)) continue;
+    seenIds.add(b.id);
+    badges.push(b);
+  }
+
   if (badges.length === 0) return null;
   const badgeColor = profile.icon_color || "#ffffff";
   const badgeFilter = profile.monochrome_icons ? badgeImageTintFilter(badgeColor) : "none";
