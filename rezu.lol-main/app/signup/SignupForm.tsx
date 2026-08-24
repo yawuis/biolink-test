@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Check, X, Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { makeAuthCallbackUrl } from "@/lib/site-url";
-import { USERNAME_RE, SITE_NAME } from "@/lib/constants";
+import { USERNAME_RE, SITE_NAME, isPremiumUsername } from "@/lib/constants";
 import DiscordButton from "@/components/DiscordButton";
 import BrandMark from "@/components/BrandMark";
 
@@ -17,7 +17,7 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
   const [username, setUsername] = useState(initialUsername);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState<"idle" | "checking" | "free" | "taken" | "invalid">("idle");
+  const [status, setStatus] = useState<"idle" | "checking" | "free" | "taken" | "invalid" | "premium_locked">("idle");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,6 +25,10 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
   useEffect(() => {
     if (!username) return setStatus("idle");
     if (!USERNAME_RE.test(username)) return setStatus("invalid");
+    if (isPremiumUsername(username)) {
+      setStatus("premium_locked");
+      return;
+    }
     setStatus("checking");
     const t = setTimeout(async () => {
       const { data } = await supabase
@@ -43,6 +47,9 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
 
     if (!USERNAME_RE.test(username)) return setError("Username: 1–20 lowercase letters, numbers, or _");
     if (status === "taken") return setError("That name is taken.");
+    if (status === "premium_locked" || isPremiumUsername(username)) {
+      return setError("Premium handle. Sign up with a standard name first, then acquire this name from the Marketplace.");
+    }
     if (!email.trim()) return setError("Enter an email.");
     if (password.length < 6) return setError("Password must be at least 6 characters.");
 
@@ -108,12 +115,13 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
               <span className="auth-handle-status">
                 {status === "checking" && <Loader2 size={15} className="spin" style={{ color: "#71717a" }} />}
                 {status === "free" && <Check size={15} style={{ color: "#10b981" }} />}
-                {(status === "taken" || status === "invalid") && <X size={15} style={{ color: "#ef4444" }} />}
+                {(status === "taken" || status === "invalid" || status === "premium_locked") && <X size={15} style={{ color: "#ef4444" }} />}
               </span>
             </div>
             <div className="auth-hint" style={{ color: status === "free" ? "#10b981" : "#ef4444" }}>
               {status === "free" && "Available"}
               {status === "taken" && "Already claimed"}
+              {status === "premium_locked" && "Premium handle — acquire it in the Marketplace first"}
               {status === "invalid" && "1–20 lowercase letters, numbers, or _"}
             </div>
           </div>
@@ -145,7 +153,7 @@ export default function SignupForm({ initialUsername }: { initialUsername: strin
           <button
             className="btn-primary"
             onClick={submit}
-            disabled={loading || status === "taken" || status === "checking"}
+            disabled={loading || status !== "free"}
             style={{ width: "100%", height: 42 }}
           >
             {loading ? "Creating…" : "Create my page"}
