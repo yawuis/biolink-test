@@ -115,7 +115,7 @@ export default function DiscordCard({ profile }: { profile: Profile }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={data.user.avatar_decoration_url} alt="" style={{ position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)", width: 76, height: 76, objectFit: "contain", pointerEvents: "none", zIndex: 2 }} />
         )}
-        <span style={{ position: "absolute", right: 3, bottom: 4, width: 16, height: 16, borderRadius: "50%", background: STATUS_COLOR[status] || STATUS_COLOR.offline, border: "3px solid #0d0d13", zIndex: 3 }} />
+        <span style={{ position: "absolute", right: 3, bottom: 4, width: 16, height: 16, borderRadius: "50%", background: STATUS_COLOR[status] || STATUS_COLOR.offline, border: "3px solid #141416", zIndex: 3 }} />
       </div>
       <div style={{ textAlign: "left", minWidth: 0, flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>

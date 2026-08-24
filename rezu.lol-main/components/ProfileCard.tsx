@@ -189,13 +189,13 @@ function BadgeStrip({ profile }: { profile: Profile }) {
     <div
       style={{
         display: "inline-flex",
-        gap: 7,
+        gap: 8,
         alignItems: "center",
         flexWrap: "wrap",
         justifyContent: "center",
-        flexBasis: manyBadges ? "100%" : "auto",
-        width: manyBadges ? "100%" : "auto",
-        marginTop: manyBadges ? 6 : 0,
+        width: "100%",
+        marginTop: 10,
+        marginBottom: 4,
       }}
     >
       {badges.map((badge) => {
@@ -208,12 +208,12 @@ function BadgeStrip({ profile }: { profile: Profile }) {
             style={{
               display: "inline-grid",
               placeItems: "center",
-              width: badge.image_url ? 18 : "auto",
-              height: badge.image_url ? 18 : "auto",
-              fontSize: 16,
-              lineHeight: 1,
+              width: 32,
+              height: 32,
+              borderRadius: 6,
+              background: "#18181b",
+              border: "1px solid #27272a",
               color: isCustom ? "inherit" : badgeColor,
-              textShadow: !isCustom && profile.badges_glow !== false ? `0 0 12px ${badgeColor}` : "none",
               cursor: "help",
             }}
           >
@@ -221,7 +221,7 @@ function BadgeStrip({ profile }: { profile: Profile }) {
               badge={badge}
               monochrome={profile.monochrome_icons !== false}
               color={badgeColor}
-              glow={!isCustom && profile.badges_glow !== false}
+              glow={false}
               size={18}
             />
             <span className="badgeTipBox">{badge.name}</span>
@@ -263,7 +263,7 @@ function ModuleCards({ profile }: { profile: Profile }) {
 function StatsRow({ profile }: { profile: Profile }) {
   const joined = profile.created_at ? new Date(profile.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
   return (
-    <div style={{ marginTop: 20, display: "flex", justifyContent: "center", gap: 16, color: "#b7b7c6", fontSize: 12, flexWrap: "wrap" }}>
+    <div style={{ marginTop: 24, borderTop: "1px solid #27272a", paddingTop: 16, display: "flex", justifyContent: "center", gap: 18, color: "#a1a1aa", fontSize: 12, flexWrap: "wrap", width: "100%" }}>
       {!profile.hide_views && <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}><Eye size={14} /> {(profile.views || 0).toLocaleString()}</span>}
       {!profile.hide_likes && <ProfileLikeButton username={profile.username} initialLikes={profile.like_count || 0} accent={resolveProfileAccent(profile.accent)} />}
       {!profile.hide_join_date && joined && <span>Joined {joined}</span>}
@@ -338,20 +338,19 @@ function Background({ profile }: { profile: Profile }) {
 
 function AvatarBlock({ profile, size = 92 }: { profile: Profile; size?: number }) {
   const isImg = /^https?:\/\//.test(profile.avatar_url || "");
-  const accent = resolveProfileAccent(profile.accent);
   return (
     <div
       style={{
         width: size,
         height: size,
-        margin: "0 auto 15px",
+        margin: "0 auto 16px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         fontSize: Math.round(size * 0.45),
-        background: "#0d0d13",
-        border: `2px solid ${accent}`,
-        boxShadow: `0 0 24px ${accent}88`,
+        background: "#141416",
+        border: `2px solid #27272a`,
+        boxShadow: `0 4px 12px rgba(0,0,0,0.3)`,
         overflow: "hidden",
         ...avatarShape(profile.avatar_shape),
       }}
@@ -367,52 +366,60 @@ function AvatarBlock({ profile, size = 92 }: { profile: Profile; size?: number }
 }
 
 function NameBlock({ profile, align = "center" }: { profile: Profile; align?: "center" | "left" }) {
-  const text = profile.text_color || "#ffffff";
+  const text = profile.text_color || "#f4f4f5";
   const accent = resolveProfileAccent(profile.accent);
   const animated = profile.animated_title && profile.username_effect !== "none";
   return (
-    <div style={{ textAlign: align }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: align === "center" ? "center" : "flex-start", gap: 8, flexWrap: "wrap" }}>
-        <HandleTooltip profile={profile}>
-          <h1
-            className={animated ? `nameEffect ${profile.username_effect}` : ""}
-            style={{
-              fontSize: 28,
-              fontWeight: 900,
-              margin: 0,
-              color: text,
-              letterSpacing: "-.03em",
-              textShadow: animated ? `0 0 18px ${accent}` : "none",
-              whiteSpace: profile.username_effect === "typewriter" ? "nowrap" : "normal",
-              overflow: profile.username_effect === "typewriter" ? "hidden" : "visible",
-              display: profile.username_effect === "typewriter" ? "inline-block" : "block",
-              borderRight: profile.username_effect === "typewriter" ? `2px solid ${accent}` : "none",
-              animation: profile.animated_title && profile.username_effect === "sparkle" ? "titlePulse 2.4s ease-in-out infinite" : profile.animated_title && profile.username_effect === "typewriter" ? "typewriterName 4.8s steps(24,end) infinite, caretBlink .8s step-end infinite" : "none",
-            }}
-          >
-            {profile.display_name || profile.username}
-          </h1>
-        </HandleTooltip>
-        <BadgeStrip profile={profile} />
+    <div style={{ textAlign: align, display: "flex", flexDirection: "column", alignItems: align === "center" ? "center" : "flex-start", gap: 8 }}>
+      <HandleTooltip profile={profile}>
+        <h1
+          className={animated ? `nameEffect ${profile.username_effect}` : ""}
+          style={{
+            fontSize: 24,
+            fontWeight: 600,
+            margin: 0,
+            color: text,
+            letterSpacing: "-.02em",
+            textShadow: "none",
+            whiteSpace: profile.username_effect === "typewriter" ? "nowrap" : "normal",
+            overflow: profile.username_effect === "typewriter" ? "hidden" : "visible",
+            display: profile.username_effect === "typewriter" ? "inline-block" : "block",
+            borderRight: profile.username_effect === "typewriter" ? `2px solid ${accent}` : "none",
+            animation: profile.animated_title && profile.username_effect === "sparkle" ? "titlePulse 2.4s ease-in-out infinite" : profile.animated_title && profile.username_effect === "typewriter" ? "typewriterName 4.8s steps(24,end) infinite, caretBlink .8s step-end infinite" : "none",
+          }}
+        >
+          {profile.display_name || profile.username}
+        </h1>
+      </HandleTooltip>
+      <BadgeStrip profile={profile} />
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", justifyContent: align === "center" ? "center" : "flex-start", marginTop: 4 }}>
+        <span style={{ fontSize: 13, color: "#a1a1aa", fontFamily: "monospace" }}>@{profile.username}</span>
+        {profile.pronouns && (
+          <span style={{ fontSize: 11, color: "#71717a", border: "1px solid #27272a", background: "#09090b", padding: "1px 6px", borderRadius: 4 }}>
+            {profile.pronouns}
+          </span>
+        )}
+        {profile.alias && !profile.hide_alias && (
+          <span style={{ fontSize: 11, color: "#71717a", border: "1px solid #27272a", background: "#09090b", padding: "1px 6px", borderRadius: 4 }}>
+            alias: @{profile.alias}
+          </span>
+        )}
       </div>
-      <p style={{ margin: "4px 0 0", fontSize: 13, color: "#d8d8e5" }}>@{profile.username}</p>
-      {profile.alias && !profile.hide_alias && <p style={{ margin: "3px 0 0", fontSize: 12, color: "#a9a9b6" }}>alias: @{profile.alias}</p>}
-      {profile.pronouns && <p style={{ margin: "4px 0 0", fontSize: 12, color: "#a9a9b6" }}>{profile.pronouns}</p>}
     </div>
   );
 }
 
 export default function ProfileCard({ profile }: { profile: Profile }) {
   const accent = resolveProfileAccent(profile.accent);
-  const text = profile.text_color || "#ffffff";
-  const opacity = Math.max(0, Math.min(100, profile.profile_opacity ?? 70)) / 100;
-  const blur = Math.max(0, Math.min(100, profile.profile_blur ?? 22));
+  const text = profile.text_color || "#f4f4f5";
+  const opacity = Math.max(0, Math.min(100, profile.profile_opacity ?? 100)) / 100;
+  const blur = Math.max(0, Math.min(100, profile.profile_blur ?? 0));
   const panel = {
-    background: opacity <= 0 ? "transparent" : `rgba(12,12,16,${opacity})`,
+    background: opacity <= 0 ? "transparent" : `rgba(20,20,22,${opacity})`,
     backdropFilter: blur <= 0 ? "none" : `blur(${blur}px)`,
     WebkitBackdropFilter: blur <= 0 ? "none" : `blur(${blur}px)`,
-    border: opacity <= 0 ? "1px solid transparent" : `1px solid ${accent}55`,
-    boxShadow: opacity <= 0 ? "none" : `0 0 0 1px #ffffff08, 0 22px 70px -28px ${accent}`,
+    border: opacity <= 0 ? "1px solid transparent" : "1px solid #27272a",
+    boxShadow: opacity <= 0 ? "none" : "0 8px 30px rgba(0, 0, 0, 0.45)",
   } as const;
 
   const isPortfolio = profile.layout === "portfolio";
@@ -432,7 +439,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
         padding: 28,
         borderRadius: "inherit",
         overflow: "hidden",
-        background: profile.background_color || "#050507",
+        background: profile.background_color || "#09090b",
         fontFamily: fontFamily(profile.font),
       }}
     >
@@ -443,7 +450,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
           style={{
             width: "100%",
             padding: isPortfolio || isBanner ? "26px" : isCompact ? "22px 20px 18px" : isMinimal ? "24px" : "30px 26px 22px",
-            borderRadius: 20,
+            borderRadius: 8,
             textAlign: isPortfolio || isBanner ? "left" : "center",
             animation: profile.profile_animation === "float" ? "float 7s ease-in-out infinite" : "none",
             ...panel,

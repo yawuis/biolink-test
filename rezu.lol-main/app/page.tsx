@@ -25,7 +25,7 @@ export default async function Home() {
         justifyContent: "center",
         textAlign: "center",
         padding: "40px 24px",
-        background: "#050507",
+        background: "#09090b",
         color: "#a1a1aa",
         fontFamily: "inherit",
       }}
@@ -90,7 +90,7 @@ export default async function Home() {
             style={{ 
               background: "transparent", 
               color: "#f4f4f5", 
-              border: "1px solid #18181b", 
+              border: "1px solid #27272a", 
               textDecoration: "none",
               fontSize: "14px",
               fontWeight: "500",
@@ -107,7 +107,7 @@ export default async function Home() {
               style={{ 
                 background: "transparent", 
                 color: "#f4f4f5", 
-                border: "1px solid #18181b", 
+                border: "1px solid #27272a", 
                 textDecoration: "none",
                 fontSize: "14px",
                 fontWeight: "500",
@@ -130,7 +130,7 @@ export default async function Home() {
               alignItems: "center",
               gap: 8,
               background: "#09090b",
-              border: "1px solid #18181b",
+              border: "1px solid #27272a",
               borderRadius: 6,
               padding: 6,
               width: "min(400px, 100%)",

@@ -1,8 +1,8 @@
 export const BACKGROUNDS: Record<string, string> = {
-  midnight: "radial-gradient(circle at 20% 20%, rgba(225,29,47,.18), #05050a 60%)",
-  ember: "radial-gradient(circle at 80% 10%, #2e0b1a, #0a0505 60%)",
-  abyss: "radial-gradient(circle at 50% 0%, #0b1f2e, #05080a 60%)",
-  void: "radial-gradient(circle at 50% 50%, #14141c, #050507 70%)",
+  midnight: "#09090b",
+  ember: "radial-gradient(circle at 80% 10%, #17151b, #09090b 70%)",
+  abyss: "radial-gradient(circle at 50% 0%, #0f172a, #09090b 70%)",
+  void: "radial-gradient(circle at 50% 50%, #141416, #09090b 80%)",
 };
 
 export const EFFECTS = ["none", "particles", "glow", "snow", "rain"] as const;

@@ -17,14 +17,14 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  background: #050507;
-  color: #e8e8ef;
+  background: #09090b;
+  color: #f4f4f5;
   font-family: "Inter", system-ui, sans-serif;
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-0.3deg); }
-  50% { transform: translateY(-10px) rotate(0.3deg); }
+  50% { transform: translateY(-5px) rotate(0.3deg); }
 }
 @keyframes glow {
   0%, 100% { opacity: 0.55; }
@@ -33,11 +33,11 @@ body {
 
 .field {
   width: 100%;
-  background: #0d0d13;
-  border: 1px solid #20202c;
-  border-radius: 10px;
+  background: #09090b;
+  border: 1px solid #27272a;
+  border-radius: 6px;
   padding: 10px 12px;
-  color: #e8e8ef;
+  color: #f4f4f5;
   font-size: 14px;
   outline: none;
   transition: border-color 0.15s;
@@ -51,7 +51,7 @@ body {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #6b6b7b;
+  color: #a1a1aa;
   margin-bottom: 6px;
   display: block;
 }
@@ -63,10 +63,10 @@ body {
   gap: 7px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
-  border-radius: 10px;
+  font-weight: 500;
+  border-radius: 6px;
   font-size: 14px;
-  padding: 11px 16px;
+  padding: 10px 16px;
   transition: transform 0.1s, filter 0.15s;
   font-family: inherit;
 }

@@ -176,7 +176,7 @@ export default function MarketplaceClient({
                 gap: 48px !important;
               }
               .inventory-col {
-                border-left: 1px solid #121214;
+                border-left: 1px solid #27272a;
                 padding-left: 48px !important;
               }
             }
@@ -202,7 +202,7 @@ export default function MarketplaceClient({
             </div>
 
             {/* Premium Handles Section */}
-            <div style={{ paddingBottom: "48px", borderBottom: "1px solid #18181b", marginBottom: "48px" }}>
+            <div style={{ paddingBottom: "48px", borderBottom: "1px solid #27272a", marginBottom: "48px" }}>
               <h2 style={{ fontSize: "18px", fontWeight: "500", color: "#f4f4f5", margin: "0 0 8px" }}>
                 Premium Handles
               </h2>
@@ -297,8 +297,8 @@ export default function MarketplaceClient({
                     <div 
                       key={badge.id}
                       style={{
-                        background: "#09090b",
-                        border: "1px solid #18181b",
+                        background: "#141416",
+                        border: "1px solid #27272a",
                         borderRadius: "8px",
                         padding: "24px",
                         display: "flex",
@@ -405,8 +405,8 @@ export default function MarketplaceClient({
                       <div 
                         key={name} 
                         style={{ 
-                          background: "#040405", 
-                          border: "1px solid #18181b", 
+                          background: "#141416", 
+                          border: "1px solid #27272a", 
                           borderRadius: "6px", 
                           padding: "10px 14px", 
                           fontSize: "13px", 
@@ -447,8 +447,8 @@ export default function MarketplaceClient({
                             display: "inline-flex", 
                             alignItems: "center", 
                             gap: "6px", 
-                            background: "#040405", 
-                            border: "1px solid #18181b", 
+                            background: "#141416", 
+                            border: "1px solid #27272a", 
                             borderRadius: "6px", 
                             padding: "8px 12px", 
                             fontSize: "12px",
