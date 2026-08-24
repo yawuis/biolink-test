@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-// Trigger Vercel rebuild for environment variables
+// Trigger Vercel rebuild for corrected environment variables
 export const dynamic = "force-dynamic";
 
 function safeId(value: string) {
