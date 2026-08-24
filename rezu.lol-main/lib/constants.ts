@@ -22,7 +22,7 @@ export const ALL_MODULES = ["about", "discord", "github", "spotify", "clock"];
 
 export const DEFAULT_ACCENT = "#55acee";
 export const SITE_NAME = "sob.lol";
-export const DISCORD_INVITE_URL = "https://discord.gg/rezu";
+export const DISCORD_INVITE_URL = "https://discord.gg/YGz8v9pvyy";
 
 export function resolveProfileAccent(accent?: string | null) {
   if (!accent) return DEFAULT_ACCENT;
