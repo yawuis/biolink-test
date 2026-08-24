@@ -169,21 +169,24 @@ export default function MarketplaceClient({
 
         {/* Main Split Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "60px" }} className="responsive-grid">
-          
           <style>{`
             @media (min-width: 900px) {
               .responsive-grid {
-                grid-template-columns: 1fr 320px !important;
+                grid-template-columns: 1fr 340px !important;
+                gap: 48px !important;
+              }
+              .inventory-col {
+                border-left: 1px solid #121214;
+                padding-left: 48px !important;
               }
             }
             .spin { animation: spin 1s linear infinite; }
             @keyframes spin { to { transform: rotate(360deg); } }
             .badge-item-card {
-              transition: border-color 0.2s ease, background-color 0.2s ease;
+              transition: border-color 0.15s ease, background-color 0.15s ease;
             }
             .badge-item-card:hover {
-              border-color: #3f3f46 !important;
-              background-color: #09090b !important;
+              border-color: #27272a !important;
             }
           `}</style>
 
@@ -345,9 +348,9 @@ export default function MarketplaceClient({
                             width: "100%",
                             padding: "8px 12px",
                             borderRadius: "6px",
-                            border: owned ? "1px solid #18181b" : "none",
-                            background: owned ? "transparent" : "#ffffff",
-                            color: owned ? "#3f3f46" : "#09090b",
+                            border: owned ? "1px solid #121214" : "1px solid #27272a",
+                            background: "transparent",
+                            color: owned ? "#3f3f46" : "#f4f4f5",
                             fontSize: "12px",
                             fontWeight: "500",
                             cursor: owned ? "default" : "pointer",
@@ -355,14 +358,16 @@ export default function MarketplaceClient({
                           }}
                           onMouseEnter={(e) => {
                             if (!owned) {
-                              e.currentTarget.style.backgroundColor = "#55acee";
-                              e.currentTarget.style.color = "#ffffff";
+                              e.currentTarget.style.borderColor = "#55acee";
+                              e.currentTarget.style.backgroundColor = "rgba(85, 172, 238, 0.08)";
+                              e.currentTarget.style.color = "#55acee";
                             }
                           }}
                           onMouseLeave={(e) => {
                             if (!owned) {
-                              e.currentTarget.style.backgroundColor = "#ffffff";
-                              e.currentTarget.style.color = "#09090b";
+                              e.currentTarget.style.borderColor = "#27272a";
+                              e.currentTarget.style.backgroundColor = "transparent";
+                              e.currentTarget.style.color = "#f4f4f5";
                             }
                           }}
                         >
@@ -377,8 +382,8 @@ export default function MarketplaceClient({
           </div>
 
           {/* Right Side: Inventory Sticky Panel */}
-          <div>
-            <div style={{ position: "sticky", top: "40px", background: "#09090b", border: "1px solid #18181b", borderRadius: "8px", padding: "28px" }}>
+          <div className="inventory-col">
+            <div style={{ position: "sticky", top: "40px", padding: "0 0 28px" }}>
               <h3 style={{ fontSize: "15px", fontWeight: "600", color: "#f4f4f5", margin: "0 0 20px" }}>
                 My Inventory
               </h3>
