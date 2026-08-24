@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import DiscordCard from "./modules/DiscordCard";
 import GithubCard from "./modules/GithubCard";
 import SpotifyCard from "./modules/SpotifyCard";
@@ -71,11 +73,37 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
     background: opacity <= 0 ? "transparent" : `rgba(20, 20, 22, ${opacity})`,
     backdropFilter: cardBlur > 0 ? `blur(${cardBlur}px)` : "none",
     WebkitBackdropFilter: cardBlur > 0 ? `blur(${cardBlur}px)` : "none",
-  } : undefined;
+  } : {
+    background: "linear-gradient(135deg, rgba(20, 20, 23, 0.6) 0%, rgba(9, 9, 11, 0.75) 100%)",
+    backdropFilter: "blur(12px)",
+    WebkitBackdropFilter: "blur(12px)",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+  };
+
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    const tiltX = -(y / (rect.height / 2)) * 5;
+    const tiltY = (x / (rect.width / 2)) * 5;
+    setTilt({ x: tiltX, y: tiltY });
+  };
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 });
+  };
+
+  const tiltStyle = {
+    transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+    transition: tilt.x === 0 && tilt.y === 0 ? "transform 0.5s ease" : "transform 0.08s ease-out",
+  };
 
   return (
     <div className="profile-page" style={{ fontFamily: fontFamily(profile.font) }}>
-      {hasBg && (
+      {hasBg ? (
         <div className="profile-bg-media">
           {isVideo ? (
             <video src={bgUrl} autoPlay muted loop playsInline preload="auto" style={{ filter: blur ? "blur(6px)" : "none", transform: blur ? "scale(1.08)" : "none" }} />
@@ -85,10 +113,17 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
           )}
           {darken && <div className="profile-bg-darken" />}
         </div>
+      ) : (
+        <div className="default-profile-bg" />
       )}
       <div
         className="profile-stack"
-        style={{ maxWidth: wide ? 760 : isCompact ? 360 : isMinimal ? 480 : 420 }}
+        style={{
+          maxWidth: wide ? 760 : isCompact ? 360 : isMinimal ? 480 : 420,
+          ...tiltStyle,
+        }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
       >
         <article
           className={[

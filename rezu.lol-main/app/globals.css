@@ -1129,3 +1129,19 @@ a.module-card:hover {
   inset: 0;
   background: rgba(9, 9, 11, 0.45);
 }
+
+/* Animated Default Profile Background Gradient */
+.default-profile-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg, #09090b, #120e22, #0a1322, #09090b);
+  background-size: 400% 400%;
+  animation: animated-gradient 18s ease infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes animated-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
