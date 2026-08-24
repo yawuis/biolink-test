@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl } from "./lib/site-url";
 
 export async function middleware(request: NextRequest) {
   const canonical = getSiteUrl();
