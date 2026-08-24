@@ -97,7 +97,7 @@ export async function GET(request: Request) {
   }
 
   if (!profile?.id) {
-    return fail("That Discord account is not linked to a rezu.lol profile yet. Sign in with email once, then link Discord in Settings.");
+    return fail("That Discord account is not linked to a sob.lol profile yet. Sign in with email once, then link Discord in Settings.");
   }
 
   const { data: userResult, error: userError } = await admin.auth.admin.getUserById(profile.id);

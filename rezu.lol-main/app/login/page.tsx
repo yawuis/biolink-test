@@ -48,7 +48,7 @@ export default function LoginPage() {
         
         {/* Logo and Header */}
         <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em", textAlign: "center", marginBottom: "28px" }}>
-          rezu<span style={{ color: "#e11d2e" }}>.lol</span>
+          sob<span style={{ color: "#55acee" }}>.lol</span>
         </div>
 
         <h1 style={{ fontSize: 20, fontWeight: 600, color: "#f4f4f5", textAlign: "center", margin: "0 0 20px", letterSpacing: "-0.02em" }}>

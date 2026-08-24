@@ -163,7 +163,7 @@ export default function MarketplaceClient({
             <ArrowLeft size={14} /> Return to dashboard
           </button>
           <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em" }}>
-            rezu<span style={{ color: "#e11d2e" }}>.lol</span>
+            sob<span style={{ color: "#55acee" }}>.lol</span>
           </div>
         </header>
 
@@ -210,7 +210,7 @@ export default function MarketplaceClient({
               <div style={{ display: "flex", gap: "12px", alignItems: "stretch", maxWidth: "480px" }}>
                 <div style={{ position: "relative", flex: 1, display: "flex", alignItems: "center", background: "#09090b", border: "1px solid #27272a", borderRadius: "6px", width: "100%" }}>
                   <span style={{ paddingLeft: "14px", color: "#52525b", fontSize: "14px", userSelect: "none", fontFamily: "monospace" }}>
-                    rezu.lol/
+                    sob.lol/
                   </span>
                   <input 
                     type="text"
@@ -330,7 +330,7 @@ export default function MarketplaceClient({
                           {badge.id === "verified" && "Account authenticity check."}
                           {badge.id === "winner" && "Commendation for top community status."}
                           {badge.id === "early_supporter" && "Honoring users who believed in the product early on."}
-                          {badge.id === "bug_hunter" && "For identifying issues and helping secure rezu.lol."}
+                          {badge.id === "bug_hunter" && "For identifying issues and helping secure sob.lol."}
                           {badge.id === "helper" && "Awarded for supportive community members."}
                           {badge.id === "staff" && "Exclusively for the official platform team."}
                           {badge.id === "owner" && "Identifies the core system administration."}
@@ -355,7 +355,7 @@ export default function MarketplaceClient({
                           }}
                           onMouseEnter={(e) => {
                             if (!owned) {
-                              e.currentTarget.style.backgroundColor = "#e11d2e";
+                              e.currentTarget.style.backgroundColor = "#55acee";
                               e.currentTarget.style.color = "#ffffff";
                             }
                           }}

@@ -20,8 +20,8 @@ export const MODULE_META: Record<string, string> = {
 };
 export const ALL_MODULES = ["about", "discord", "github", "spotify", "clock"];
 
-export const DEFAULT_ACCENT = "#e11d2f";
-export const SITE_NAME = "rezu.lol";
+export const DEFAULT_ACCENT = "#55acee";
+export const SITE_NAME = "sob.lol";
 export const DISCORD_INVITE_URL = "https://discord.gg/rezu";
 
 export const USERNAME_RE = /^[a-z0-9_]{1,20}$/;

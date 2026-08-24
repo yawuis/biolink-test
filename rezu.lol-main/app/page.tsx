@@ -32,7 +32,7 @@ export default async function Home() {
     >
       {/* Brand Logo */}
       <div style={{ fontSize: "14px", fontWeight: "600", color: "#f4f4f5", letterSpacing: "-0.01em", marginBottom: "40px" }}>
-        rezu<span style={{ color: "#e11d2e" }}>.lol</span>
+        sob<span style={{ color: "#55acee" }}>.lol</span>
       </div>
 
       {/* Hero Title */}
@@ -60,7 +60,7 @@ export default async function Home() {
         ) : (
           <>
             Claim your name before someone else does. Each name can only belong to one person. Check out the{" "}
-            <Link href="/marketplace" style={{ color: "#e11d2e", fontWeight: "500", textDecoration: "none" }}>
+            <Link href="/marketplace" style={{ color: "#55acee", fontWeight: "500", textDecoration: "none" }}>
               Marketplace
             </Link>{" "}
             for premium handles.
@@ -136,7 +136,7 @@ export default async function Home() {
               width: "min(400px, 100%)",
             }}
           >
-            <span style={{ color: "#52525b", paddingLeft: 10, fontSize: 14, fontFamily: "monospace" }}>rezu.lol/</span>
+            <span style={{ color: "#52525b", paddingLeft: 10, fontSize: 14, fontFamily: "monospace" }}>sob.lol/</span>
             <input
               name="username"
               placeholder="yourname"
