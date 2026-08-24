@@ -25,7 +25,7 @@ export type PlatformMeta = {
 };
 
 export const PLATFORMS: Record<string, PlatformMeta> = {
-  discord: { icon: MessageCircle, label: "Discord", placeholder: "discord.gg/rezu", brandSlug: "discord", brandColor: "#5865F2" },
+  discord: { icon: MessageCircle, label: "Discord", placeholder: "discord.gg/YGz8v9pvyy", brandSlug: "discord", brandColor: "#5865F2" },
   youtube: { icon: Youtube, label: "YouTube", placeholder: "youtube.com/@you", brandSlug: "youtube", brandColor: "#FF0000" },
   github: { icon: Github, label: "GitHub", placeholder: "github.com/you", brandSlug: "github", brandColor: "#ffffff" },
   spotify: { icon: Music, label: "Spotify", placeholder: "open.spotify.com/...", brandSlug: "spotify", brandColor: "#1DB954" },

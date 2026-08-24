@@ -1617,8 +1617,9 @@ const dashCss = `
 .metric2 b{display:block;font-size:13px;font-weight:500;color:#a1a1aa}
 .metric2 span{display:block;color:#71717a;font-size:12px;margin-top:6px;line-height:1.4}
 
-.previewBox2{height:620px;border-radius:10px;overflow:hidden;border:1px solid #27272a;background:#09090b;display:flex;flex-direction:column}
-.previewBox2>*{flex:1;min-height:0;width:100%;height:100%;overflow:auto}
+.previewBox2{height:auto;border-radius:10px;overflow:visible;border:1px solid #27272a;background:#09090b;display:flex;flex-direction:column}
+.previewBox2>*{flex:1;min-height:unset;width:100%;height:auto;overflow:visible}
+.previewBox2 .profile-page{min-height:unset;height:auto;padding:32px 16px;overflow:visible}
 .formGrid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .formGrid2 .span2{grid-column:span 2}
 
@@ -1930,8 +1931,7 @@ select option{background:#09090b;color:#f4f4f5}
   .main2{padding:24px}
   .mobileTabs2{display:block;margin-bottom:16px}
   .stats4{grid-template-columns:1fr}
-  .topbarActions2{justify-content:flex-start}
-  .previewBox2{height:520px}
+   .previewBox2{height:auto}
   .gunAssetGrid2,.gunGeneralGrid2,.gunColorGrid2{grid-template-columns:1fr}
 }
 `;

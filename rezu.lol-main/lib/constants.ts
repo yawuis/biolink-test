@@ -225,9 +225,6 @@ export function milestoneBadgesForProfile(profile: Pick<Profile, "public_uid">):
 
 export function badgesFromDiscordRoleIds(roleIds: string[]): BadgeItem[] {
   const roles = new Set((roleIds || []).map(String));
-  if (roles.has(OWNER_ROLE_ID)) {
-    return DISCORD_ROLE_BADGES.map(({ id, name, icon, monoIcon }) => ({ id, name, icon, monoIcon, enabled: true }));
-  }
   return DISCORD_ROLE_BADGES
     .filter((badge) => roles.has(badge.roleId))
     .map(({ id, name, icon, monoIcon }) => ({ id, name, icon, monoIcon, enabled: true }));

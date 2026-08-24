@@ -7,6 +7,7 @@ import BrandIcon from "./BrandIcon";
 import BadgeIcon from "./BadgeIcon";
 import ProfileLikeButton from "./ProfileLikeButton";
 import {
+  DISCORD_ROLE_BADGES,
   MARKETPLACE_BADGES,
   badgesFromDiscordRoleIds,
   milestoneBadgesForProfile,
@@ -75,7 +76,15 @@ export function collectBadges(profile: Profile, roleBadges: BadgeItem[]) {
   const milestoneBadges = milestoneBadgesForProfile(profile).filter((badge) => !hiddenBadgeIds.has(badge.id));
   const ownedBadgeIds = Array.isArray(profile.owned_badges) ? profile.owned_badges.map(String) : [];
   const purchasedBadges = MARKETPLACE_BADGES.filter((mb) => ownedBadgeIds.includes(mb.id));
-  const allBadgesList = [...roleBadges, ...milestoneBadges, ...purchasedBadges, ...customBadges];
+
+  const explicitlyEnabledBadges = (profile.badges || [])
+    .filter((b) => b.enabled === true)
+    .map((b) => {
+      const meta = DISCORD_ROLE_BADGES.find((dr) => dr.id === b.id) || MARKETPLACE_BADGES.find((mb) => mb.id === b.id);
+      return meta ? { ...meta, enabled: true } : b;
+    });
+
+  const allBadgesList = [...roleBadges, ...milestoneBadges, ...purchasedBadges, ...customBadges, ...explicitlyEnabledBadges];
   const seenIds = new Set<string>();
   const badges: BadgeItem[] = [];
   for (const b of allBadgesList) {

@@ -10,6 +10,7 @@ import {
   BioBlock,
   collectBadges,
   fontFamily,
+  isVideoBackground,
   LinkIcons,
   NameBlock,
   ProfileBanner,
@@ -52,16 +53,39 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
   const roleBadges = useDiscordRoleBadges(profile);
   const badges = collectBadges(profile, roleBadges);
   const hasBg = /^https?:\/\//.test(profile.background_url || "");
+  const bgUrl = profile.background_url || "";
+  const isVideo = isVideoBackground(bgUrl);
+  const blur = profile.background_effect === "blurred";
+  const darken = profile.background_effect === "darken";
+
   const isPortfolio = profile.layout === "portfolio";
   const isCompact = profile.layout === "compact";
   const isMinimal = profile.layout === "minimal";
   const isBanner = profile.layout === "banner";
   const wide = isPortfolio || isBanner;
-  const showBanner = hasBg && !isMinimal;
   const modulesOn = hasModules(profile);
+
+  const opacity = Math.max(0, Math.min(100, profile.profile_opacity ?? 100)) / 100;
+  const cardBlur = Math.max(0, Math.min(100, profile.profile_blur ?? 0));
+  const cardStyle = hasBg ? {
+    background: opacity <= 0 ? "transparent" : `rgba(20, 20, 22, ${opacity})`,
+    backdropFilter: cardBlur > 0 ? `blur(${cardBlur}px)` : "none",
+    WebkitBackdropFilter: cardBlur > 0 ? `blur(${cardBlur}px)` : "none",
+  } : undefined;
 
   return (
     <div className="profile-page" style={{ fontFamily: fontFamily(profile.font) }}>
+      {hasBg && (
+        <div className="profile-bg-media">
+          {isVideo ? (
+            <video src={bgUrl} autoPlay muted loop playsInline preload="auto" style={{ filter: blur ? "blur(6px)" : "none", transform: blur ? "scale(1.08)" : "none" }} />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={bgUrl} alt="" style={{ filter: blur ? "blur(6px)" : "none", transform: blur ? "scale(1.08)" : "none" }} />
+          )}
+          {darken && <div className="profile-bg-darken" />}
+        </div>
+      )}
       <div
         className="profile-stack"
         style={{ maxWidth: wide ? 760 : isCompact ? 360 : isMinimal ? 480 : 420 }}
@@ -69,12 +93,12 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
         <article
           className={[
             "profile-card",
-            showBanner ? "has-banner" : "no-banner",
+            "no-banner",
             isCompact ? "is-compact" : "",
             modulesOn ? "has-modules" : "",
           ].join(" ")}
+          style={cardStyle}
         >
-          {showBanner && <ProfileBanner profile={profile} height={isCompact ? 88 : wide ? 140 : 120} />}
 
           {wide ? (
             <div className={`profile-split ${isBanner ? "is-banner" : ""}`}>
