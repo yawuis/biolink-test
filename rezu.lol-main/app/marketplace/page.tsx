@@ -21,10 +21,10 @@ export default async function MarketplacePage() {
 
   const myUsernames = (purchased || []).map((p: any) => String(p.username));
 
-  // Get user's owned badges from profiles
+  // Get user's owned badges and discord_id from profiles
   const { data: profile } = await supabase
     .from("profiles")
-    .select("owned_badges")
+    .select("owned_badges, discord_id")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -35,6 +35,7 @@ export default async function MarketplacePage() {
   return (
     <MarketplaceClient
       userId={user.id}
+      discordId={profile?.discord_id || null}
       myUsernames={myUsernames}
       myBadges={myBadges}
       availableBadges={MARKETPLACE_BADGES.map((b) => ({ id: b.id, name: b.name, icon: b.icon }))}

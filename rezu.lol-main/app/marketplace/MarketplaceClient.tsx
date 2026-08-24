@@ -1,27 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, X, Loader2, Sparkles, ShoppingBag, ArrowLeft, Award, Crown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { isPremiumUsername, MARKETPLACE_PRICES } from "@/lib/constants";
+import { isPremiumUsername, MARKETPLACE_PRICES, DISCORD_ROLE_BADGES } from "@/lib/constants";
 import { purchaseUsername, purchaseBadge } from "./actions";
 
 type BadgeItem = { id: string; name: string; icon: string };
 
 export default function MarketplaceClient({
   userId,
+  discordId,
   myUsernames,
   myBadges,
   availableBadges,
 }: {
   userId: string;
+  discordId: string | null;
   myUsernames: string[];
   myBadges: string[];
   availableBadges: BadgeItem[];
 }) {
   const router = useRouter();
   const supabase = createClient();
+
+  // Fetch user's Discord roles to mark earned badges as owned
+  const [discordRoles, setDiscordRoles] = useState<string[]>([]);
+  useEffect(() => {
+    if (!discordId) return;
+    let alive = true;
+    async function loadRoles() {
+      try {
+        const res = await fetch(`/api/discord/presence/${discordId}`);
+        const data = await res.json();
+        if (!alive) return;
+        const roleIds = Array.isArray(data?.member?.roles) ? data.member.roles : Array.isArray(data?.roles) ? data.roles : [];
+        setDiscordRoles(roleIds.map(String));
+      } catch {}
+    }
+    loadRoles();
+    return () => { alive = false; };
+  }, [discordId]);
 
   // Username Search State
   const [searchName, setSearchName] = useState("");
@@ -193,7 +213,9 @@ export default function MarketplaceClient({
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16 }}>
             {availableBadges.map((badge) => {
-              const owned = myBadges.includes(badge.id);
+              const roleBadge = DISCORD_ROLE_BADGES.find((dr) => dr.id === badge.id);
+              const earnedViaDiscord = roleBadge ? discordRoles.includes(roleBadge.roleId) : false;
+              const owned = myBadges.includes(badge.id) || earnedViaDiscord;
               const price = MARKETPLACE_PRICES[badge.id] || 0;
 
               return (
@@ -203,7 +225,7 @@ export default function MarketplaceClient({
                     <div style={{ display: "flex", flexDirection: "column" }}>
                       <strong style={{ fontSize: 15 }}>{badge.name}</strong>
                       <small style={{ color: "#9a9aaa", fontSize: 12 }}>
-                        {owned ? "Owned" : `$${price?.toFixed(2)}`}
+                        {owned ? (earnedViaDiscord ? "Owned (Role)" : "Owned") : `$${price?.toFixed(2)}`}
                       </small>
                     </div>
                   </div>
@@ -222,7 +244,7 @@ export default function MarketplaceClient({
                       cursor: owned ? "default" : "pointer"
                     }}
                   >
-                    {owned ? "Unlocked" : "Buy Badge"}
+                    {owned ? "Owned" : "Buy Badge"}
                   </button>
                 </div>
               );
@@ -253,9 +275,9 @@ export default function MarketplaceClient({
             </div>
 
             <div>
-              <h3 style={{ fontSize: 14, color: "#9a9aaa", margin: "0 0 10px" }}>Unlocked Badges ({myBadges.length})</h3>
+              <h3 style={{ fontSize: 14, color: "#9a9aaa", margin: "0 0 10px" }}>Purchased Badges ({myBadges.length})</h3>
               {myBadges.length === 0 ? (
-                <p style={{ fontSize: 13, color: "#6b6b7b" }}>No premium badges owned yet.</p>
+                <p style={{ fontSize: 13, color: "#6b6b7b" }}>No premium badges purchased yet.</p>
               ) : (
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {myBadges.map((badgeId) => {
