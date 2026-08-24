@@ -19,7 +19,14 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     return NextResponse.json({ ok: false, error: "Discord presence bot API is not configured" }, { status: 503 });
   }
 
-  const url = new URL(`/presence/${id}`, base.endsWith("/") ? base : `${base}/`);
+  let url: URL;
+  try {
+    const formattedBase = base.startsWith("http://") || base.startsWith("https://") ? base : `https://${base}`;
+    url = new URL(`/presence/${id}`, formattedBase.endsWith("/") ? formattedBase : `${formattedBase}/`);
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: "Invalid presence bot URL configuration" }, { status: 500 });
+  }
+
   const res = await fetch(url, {
     headers: key ? { "x-api-key": key } : {},
     next: { revalidate: 8 },
