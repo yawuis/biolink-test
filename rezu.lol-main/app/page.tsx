@@ -27,9 +27,8 @@ function MockProfile() {
           <h2 className="profile-name">pluto</h2>
           <div className="profile-badges">
             {[
-              { id: "verified", name: "Verified", icon: "☑️" },
-              { id: "og", name: "OG", icon: "🧍" },
-              { id: "donor", name: "Donor", icon: "💰" },
+              { id: "owner", name: "Owner", icon: "👑" },
+              { id: "staff", name: "Developer", icon: "🛠️" },
             ].map((badge) => (
               <span key={badge.id} className="profile-badge badgeTipWrap" title={badge.name}>
                 <BadgeIcon badge={badge} monochrome={false} size={16} />
@@ -42,9 +41,6 @@ function MockProfile() {
             <span className="profile-chip">he/him</span>
           </div>
           <p className="profile-bio">Designer. Builder. Mostly offline.</p>
-          <p className="profile-location">
-            <MapPin size={13} /> Berlin
-          </p>
           <div className="profile-tags">
             <span className="profile-tag">design</span>
             <span className="profile-tag">music</span>
