@@ -279,7 +279,7 @@ function Background({ profile }: { profile: Profile }) {
   const accent = resolveProfileAccent(profile.accent);
   const hasBgMedia = /^https?:\/\//.test(profile.background_url || "");
   const hasBgVideo = hasBgMedia && isVideoBackground(profile.background_url);
-  const fallbackBg = profile.background_color || (BACKGROUNDS[profile.bg] || BACKGROUNDS.midnight);
+  const fallbackBg = BACKGROUNDS[profile.bg] || BACKGROUNDS.midnight;
   const mediaStyle = {
     position: "absolute" as const,
     inset: -10,

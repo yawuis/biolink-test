@@ -121,7 +121,7 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
 
   return (
     <div style={{ position: "relative", minHeight: "100vh", color: text, fontFamily: profile.font === "JetBrains Mono" ? "monospace" : `${profile.font || "Inter"}, system-ui, sans-serif` }}>
-      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: hasBgMedia ? "#050507" : profile.background_color || BACKGROUNDS[profile.bg] || BACKGROUNDS.midnight }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: -1, background: hasBgMedia ? "#09090b" : BACKGROUNDS[profile.bg] || BACKGROUNDS.midnight }}>
         {hasBgMedia && (
           hasBgVideo ? (
             <video
@@ -167,7 +167,7 @@ export default function ScrollProfile({ profile }: { profile: Profile }) {
                   ? "rgba(0,0,0,.66)"
                   : "linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.74))"
               : profile.profile_gradient
-                ? `radial-gradient(circle at 50% 18%, ${accent}55, transparent 45%), linear-gradient(180deg, ${profile.background_color || "#050505"}, #000)`
+                ? `radial-gradient(circle at 50% 18%, ${accent}22, transparent 60%), linear-gradient(180deg, #0f1318, #09090b)`
                 : "linear-gradient(180deg, rgba(5,5,7,0.25), rgba(5,5,7,0.75))",
           }}
         />
