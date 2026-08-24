@@ -15,11 +15,12 @@ function MockProfile() {
         <span>Preview</span>
         <span>{SITE_NAME}/pluto</span>
       </div>
-      <article className="profile-card no-banner has-modules" style={{ pointerEvents: "none" }}>
+      <article className="profile-card no-banner has-modules">
         <div className="profile-body">
           <div className="profile-avatar-wrap">
-            <div className="profile-avatar" style={{ borderRadius: "50%", fontSize: 34, color: "#a1a1aa" }}>
-              P
+            <div className="profile-avatar" style={{ borderRadius: "50%" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="https://cdn.discordapp.com/avatars/1505623649007308954/7a945ed5242237ddecebf0bfb04c2329.webp?size=1024" alt="" />
             </div>
           </div>
           <h2 className="profile-name">pluto</h2>
@@ -29,8 +30,9 @@ function MockProfile() {
               { id: "og", name: "OG", icon: "🧍" },
               { id: "donor", name: "Donor", icon: "💰" },
             ].map((badge) => (
-              <span key={badge.id} className="profile-badge" title={badge.name}>
+              <span key={badge.id} className="profile-badge badgeTipWrap" title={badge.name}>
                 <BadgeIcon badge={badge} monochrome={false} size={16} />
+                <span className="badgeTipBox">{badge.name}</span>
               </span>
             ))}
           </div>
