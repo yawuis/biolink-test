@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import SiteHeader from "@/components/SiteHeader";
 import BrandMark from "@/components/BrandMark";
 import BadgeIcon from "@/components/BadgeIcon";
+import DiscordCard from "@/components/modules/DiscordCard";
 import { DISCORD_INVITE_URL, SITE_NAME } from "@/lib/constants";
 import { Clock, Eye, Heart, MapPin, MessageCircle } from "lucide-react";
 
@@ -60,20 +61,7 @@ function MockProfile() {
           </div>
         </div>
         <div className="profile-modules">
-          <div className="module-card">
-            <div style={{ position: "relative", width: 40, height: 40, flex: "none" }}>
-              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#18181b", border: "1px solid #27272a" }} />
-              <span style={{ position: "absolute", right: -1, bottom: -1, width: 12, height: 12, borderRadius: "50%", background: "#22c55e", border: "2px solid #141416" }} />
-            </div>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div className="module-name" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                pluto <span style={{ fontSize: 11, fontWeight: 600, color: "#22c55e" }}>online</span>
-              </div>
-              <div className="module-sub" style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <MessageCircle size={13} /> Listening to something quiet
-              </div>
-            </div>
-          </div>
+          <DiscordCard profile={{ discord_id: "1505623649007308954", discord_enabled: true } as any} />
           <div className="module-card">
             <div style={{ width: 40, height: 40, borderRadius: 10, background: "#09090b", border: "1px solid #27272a", display: "grid", placeItems: "center", flex: "none" }}>
               <Clock size={18} style={{ color: "#a1a1aa" }} />
