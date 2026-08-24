@@ -186,17 +186,12 @@ export default function MarketplaceClient({
                     {(searchStatus === "taken" || searchStatus === "purchased" || searchStatus === "not_premium") && <X size={15} style={{ color: "#ef4444" }} />}
                   </span>
                 </div>
-                {searchStatus === "available" && (
-                  <button className="btn-primary" onClick={handleBuyUsername} disabled={loading} style={{ height: 42 }}>
-                    {loading ? <Loader2 size={13} className="spin" /> : "Acquire"}
-                  </button>
-                )}
               </div>
 
               <div style={{ minHeight: 20, fontSize: 13, marginTop: 10 }}>
                 {searchStatus === "available" && (
                   <span style={{ color: "#10b981" }}>
-                    Available — ${getUsernamePrice()?.toFixed(2)}
+                    Available — Acquisition coming soon
                   </span>
                 )}
                 {searchStatus === "taken" && <span style={{ color: "#ef4444" }}>Already claimed.</span>}
@@ -233,7 +228,7 @@ export default function MarketplaceClient({
                             borderRadius: 6,
                             fontWeight: 500,
                           }}>
-                            {owned ? (earnedViaDiscord ? "Owned · role" : "Owned") : `$${price.toFixed(2)}`}
+                            {owned ? (earnedViaDiscord ? "Owned · role" : "Owned") : "Premium"}
                           </span>
                         </div>
                         <strong style={{ display: "block", fontSize: 14, fontWeight: 600, color: "#f4f4f5", marginBottom: 6 }}>
@@ -245,11 +240,10 @@ export default function MarketplaceClient({
                       </div>
                       <button
                         className={owned ? "btn-secondary" : "btn-primary"}
-                        onClick={() => !owned && handleBuyBadge(badge.id, badge.name)}
-                        disabled={owned}
-                        style={{ width: "100%", marginTop: 16, height: 36, opacity: owned ? 0.55 : 1 }}
+                        disabled={true}
+                        style={{ width: "100%", marginTop: 16, height: 36, opacity: 0.55 }}
                       >
-                        {owned ? "Owned" : "Acquire"}
+                        {owned ? "Owned" : "Coming soon"}
                       </button>
                     </div>
                   );
