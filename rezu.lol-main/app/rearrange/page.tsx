@@ -238,6 +238,20 @@ export default function RearrangePage() {
         ))}
       </svg>
 
+      {profile.background_url ? (
+        <div style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
+          {profile.background_url.endsWith(".mp4") ? (
+            <video src={profile.background_url} autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover", filter: profile.background_effect === "blurred" ? "blur(6px)" : "none", transform: profile.background_effect === "blurred" ? "scale(1.08)" : "none" }} />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profile.background_url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", filter: profile.background_effect === "blurred" ? "blur(6px)" : "none", transform: profile.background_effect === "blurred" ? "scale(1.08)" : "none" }} />
+          )}
+          {profile.background_effect === "darken" && <div className="profile-bg-darken" />}
+        </div>
+      ) : (
+        <div className="default-profile-bg" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", zIndex: 1 }} />
+      )}
+
       <div style={{
         minHeight: "100vh",
         display: "flex",
@@ -246,28 +260,16 @@ export default function RearrangePage() {
         padding: "100px 20px 40px",
         boxSizing: "border-box",
         position: "relative",
+        zIndex: 2,
       }}>
-        {profile.background_url ? (
-          <div className="profile-bg-media" style={{ zIndex: 1 }}>
-            {profile.background_url.endsWith(".mp4") ? (
-              <video src={profile.background_url} autoPlay muted loop playsInline />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.background_url} alt="" />
-            )}
-          </div>
-        ) : (
-          <div className="default-profile-bg" style={{ zIndex: 1 }} />
-        )}
-
-        <div ref={mainCardRef} style={{ zIndex: 20 }}>
-          <ProfileCard profile={{ ...profile, modules: [] }} />
+        {/* Main Details Card (Centered Base) */}
+        <div ref={mainCardRef} style={{ zIndex: 20, width: "100%", maxWidth: profile.layout === "portfolio" || profile.layout === "banner" ? 760 : profile.layout === "compact" ? 360 : profile.layout === "minimal" ? 480 : 420 }}>
+          <ProfileCard profile={profile} onlyCard={true} />
         </div>
 
+        {/* Floating Modules */}
         {activeModules.map((m) => {
           const pos = coords[m] || { x: 0, y: 0 };
-          const singleProfile = { ...profile, modules: [m] };
-          
           return (
             <div
               key={m}
@@ -277,9 +279,11 @@ export default function RearrangePage() {
                 transform: `translate(${pos.x}px, ${pos.y}px)`,
                 zIndex: dragging === m ? 30 : 25,
                 transition: dragging === m ? "none" : "transform 0.1s ease-out",
-                cursor: "grab",
+                width: "100%",
+                maxWidth: profile.layout === "compact" ? 360 : profile.layout === "minimal" ? 480 : 420,
               }}
             >
+              {/* Drag Handle Indicator */}
               <div
                 onMouseDown={(e) => startDrag(m, e)}
                 style={{
@@ -300,7 +304,7 @@ export default function RearrangePage() {
               >
                 <Move size={14} />
               </div>
-              <ProfileCard profile={singleProfile} />
+              <ProfileCard profile={profile} onlyModule={m} />
             </div>
           );
         })}

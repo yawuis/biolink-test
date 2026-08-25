@@ -125,7 +125,17 @@ function hasModules(profile: Profile) {
   );
 }
 
-export default function ProfileCard({ profile, onRearrange }: { profile: Profile; onRearrange?: (modules: string[]) => void }) {
+export default function ProfileCard({
+  profile,
+  onRearrange,
+  onlyCard,
+  onlyModule,
+}: {
+  profile: Profile;
+  onRearrange?: (modules: string[]) => void;
+  onlyCard?: boolean;
+  onlyModule?: string;
+}) {
   const roleBadges = useDiscordRoleBadges(profile);
   const badges = collectBadges(profile, roleBadges);
   const hasBg = /^https?:\/\//.test(profile.background_url || "");
@@ -174,6 +184,74 @@ export default function ProfileCard({ profile, onRearrange }: { profile: Profile
     transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
     transition: tilt.x === 0 && tilt.y === 0 ? "transform 0.5s ease" : "transform 0.08s ease-out",
   };
+
+  if (onlyModule) {
+    if (onlyModule === "discord" && (!!profile.discord_enabled || !!profile.discord_id)) {
+      return (
+        <article className="profile-card no-banner" style={{ ...cardStyle, width: "100%", height: "100%" }}>
+          <DiscordCard profile={profile} />
+        </article>
+      );
+    }
+    if (onlyModule === "github" && !!profile.github_user) {
+      return (
+        <article className="profile-card no-banner" style={{ ...cardStyle, width: "100%", height: "100%" }}>
+          <GithubCard profile={profile} />
+        </article>
+      );
+    }
+    if (onlyModule === "spotify" && !!profile.spotify_url) {
+      return (
+        <article className="profile-card no-banner" style={{ ...cardStyle, width: "100%", height: "100%" }}>
+          <SpotifyCard profile={profile} />
+        </article>
+      );
+    }
+    if (onlyModule === "clock") {
+      return (
+        <article className="profile-card no-banner" style={{ ...cardStyle, width: "100%", height: "100%" }}>
+          <Clock profile={profile} />
+        </article>
+      );
+    }
+    return null;
+  }
+
+  if (onlyCard) {
+    return (
+      <article
+        className={[
+          "profile-card",
+          "no-banner",
+          isCompact ? "is-compact" : "",
+        ].join(" ")}
+        style={{ ...cardStyle, width: "100%", height: "100%" }}
+      >
+        {wide ? (
+          <div className={`profile-split ${isBanner ? "is-banner" : ""}`}>
+            {!isBanner && <AvatarBlock profile={profile} size={104} />}
+            <div className="profile-body" style={{ textAlign: "left", padding: 0 }}>
+              <NameBlock profile={profile} badges={badges} align="left" />
+              <BioBlock profile={profile} />
+              <SkillTags profile={profile} align="left" />
+              <LinkIcons profile={profile} align="left" />
+              <StatsRow profile={profile} align="left" />
+            </div>
+            {isBanner && <AvatarBlock profile={profile} size={104} />}
+          </div>
+        ) : (
+          <div className="profile-body">
+            <ProfileIdentity
+              profile={profile}
+              badges={badges}
+              compact={isCompact}
+              hideAvatar={isMinimal}
+            />
+          </div>
+        )}
+      </article>
+    );
+  }
 
   return (
     <div className="profile-page" style={{ fontFamily: fontFamily(profile.font) }}>

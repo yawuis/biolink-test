@@ -213,14 +213,13 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
             </svg>
 
             {/* Centered Main Profile Info */}
-            <div ref={mainCardRef} style={{ zIndex: 20 }}>
-              <ProfileCard profile={{ ...profile, modules: [] }} />
+            <div ref={mainCardRef} style={{ zIndex: 20, width: "100%", maxWidth: profile.layout === "portfolio" || profile.layout === "banner" ? 760 : profile.layout === "compact" ? 360 : profile.layout === "minimal" ? 480 : 420 }}>
+              <ProfileCard profile={profile} onlyCard={true} />
             </div>
 
             {/* Absolutely Positioned Custom Floating Cards */}
             {Object.keys(coords).map((m) => {
               const pos = coords[m] || { x: 0, y: 0 };
-              const singleProfile = { ...profile, modules: [m] };
               return (
                 <div
                   key={m}
@@ -229,9 +228,11 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
                     position: "absolute",
                     transform: `translate(${pos.x}px, ${pos.y}px)`,
                     zIndex: 25,
+                    width: "100%",
+                    maxWidth: profile.layout === "compact" ? 360 : profile.layout === "minimal" ? 480 : 420,
                   }}
                 >
-                  <ProfileCard profile={singleProfile} />
+                  <ProfileCard profile={profile} onlyModule={m} />
                 </div>
               );
             })}
