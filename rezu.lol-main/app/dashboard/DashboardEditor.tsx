@@ -8,16 +8,22 @@ import {
   BarChart3,
   Brush,
   Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
   Crown,
   Eye,
   ExternalLink,
+  Gem,
   Github,
   Globe,
+  HelpCircle,
   Image as ImageIcon,
   Link as LinkIcon,
   Loader2,
   LogOut,
   MessageCircle,
+  MoreHorizontal,
   Music,
   Plus,
   Save,
@@ -56,7 +62,7 @@ import {
   type Profile,
   MARKETPLACE_BADGES,
 } from "@/lib/constants";
-import { resizeCursorPng, uploadFile } from "@/lib/upload";
+import { resizeCursorPng, uploadFile, uploadHostedImage, deleteHostedImage } from "@/lib/upload";
 import { createClient } from "@/lib/supabase/client";
 import { getBrowserPublicBaseUrl } from "@/lib/site-url";
 import { saveProfile, signOut } from "./actions";
@@ -66,12 +72,12 @@ type Tab =
   | "overview"
   | "customize"
   | "links"
-  | "layout"
-  | "metadata"
   | "settings"
   | "analytics"
   | "badges"
-  | "templates";
+  | "templates"
+  | "premium"
+  | "imagehost";
 
 type TemplateRow = {
   id: string;
@@ -87,14 +93,14 @@ type TemplateRow = {
 
 const NAV: { tab: Tab; label: string; icon: any; desc: string }[] = [
   { tab: "overview", label: "Overview", icon: User, desc: "Finish your page, then check the live preview." },
-  { tab: "customize", label: "Customize", icon: Brush, desc: "Profile details, assets, colors, and integrations." },
+  { tab: "customize", label: "Customize", icon: Brush, desc: "Profile details, layouts, assets, colors, and SEO metadata." },
   { tab: "links", label: "Links", icon: LinkIcon, desc: "Manage socials and custom URL cards." },
-  { tab: "layout", label: "Layout", icon: Wand2, desc: "Choose modules, layout, and profile behavior." },
-  { tab: "metadata", label: "Metadata", icon: Eye, desc: "SEO title, description, favicon, and website image." },
+  { tab: "premium", label: "Premium", icon: Gem, desc: "Upgrade to premium perks and badges." },
+  { tab: "imagehost", label: "Image Host", icon: ImageIcon, desc: "Upload and host custom assets." },
+  { tab: "templates", label: "Templates", icon: Copy, desc: "Save and apply user-created templates." },
   { tab: "settings", label: "Settings", icon: Settings, desc: "Username, alias, and privacy settings." },
   { tab: "analytics", label: "Analytics", icon: BarChart3, desc: "Simple profile performance stats." },
   { tab: "badges", label: "Badges", icon: BadgeCheck, desc: "View Discord role badges and choose glow." },
-  { tab: "templates", label: "Templates", icon: Crown, desc: "Save and apply user-created templates." },
 ];
 
 function normalizeProfile(initial: Profile): Profile {
@@ -117,6 +123,8 @@ export default function DashboardEditor({ initial, isOwner = false }: { initial:
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [accountOpen, setAccountOpen] = useState(true);
+  const [quickMenuOpen, setQuickMenuOpen] = useState(false);
 
   const update = (patch: Partial<Profile>) => setP((prev) => ({ ...prev, ...patch }));
   const profileAccent = p.accent || "#55acee";
@@ -178,17 +186,17 @@ const SEARCH_INDEX: SearchResult[] = [
   { label: "Custom URL", sub: "Add a custom link", tab: "links", anchor: "s-quickadd" },
   { label: "Social links", sub: "Manage socials", tab: "links", anchor: "s-linklist" },
   // Layout
-  { label: "Layout type", sub: "Classic, portfolio, scroll etc.", tab: "layout", anchor: "s-layouttype" },
-  { label: "Module visibility", sub: "About, Discord, Spotify etc.", tab: "layout", anchor: "s-modules" },
-  { label: "About module", sub: "Show/hide about section", tab: "layout", anchor: "s-modules" },
-  { label: "Spotify module", sub: "Show/hide Spotify card", tab: "layout", anchor: "s-modules" },
-  { label: "Clock module", sub: "Show/hide local time", tab: "layout", anchor: "s-modules" },
+  { label: "Layout type", sub: "Classic, portfolio, scroll etc.", tab: "customize", anchor: "s-layouttype" },
+  { label: "Module visibility", sub: "About, Discord, Spotify etc.", tab: "customize", anchor: "s-modules" },
+  { label: "About module", sub: "Show/hide about section", tab: "customize", anchor: "s-modules" },
+  { label: "Spotify module", sub: "Show/hide Spotify card", tab: "customize", anchor: "s-modules" },
+  { label: "Clock module", sub: "Show/hide local time", tab: "customize", anchor: "s-modules" },
   // Metadata
-  { label: "Website title", sub: "SEO page title", tab: "metadata", anchor: "s-metadata" },
-  { label: "Website description", sub: "SEO meta description", tab: "metadata", anchor: "s-metadata" },
-  { label: "Website image", sub: "Open Graph / Twitter card image", tab: "metadata", anchor: "s-metadata" },
-  { label: "Custom favicon", sub: "Browser tab icon", tab: "metadata", anchor: "s-metadata" },
-  { label: "Search indexing", sub: "Allow/block search engines", tab: "metadata", anchor: "s-metadata" },
+  { label: "Website title", sub: "SEO page title", tab: "customize", anchor: "s-metadata" },
+  { label: "Website description", sub: "SEO meta description", tab: "customize", anchor: "s-metadata" },
+  { label: "Website image", sub: "Open Graph / Twitter card image", tab: "customize", anchor: "s-metadata" },
+  { label: "Custom favicon", sub: "Browser tab icon", tab: "customize", anchor: "s-metadata" },
+  { label: "Search indexing", sub: "Allow/block search engines", tab: "customize", anchor: "s-metadata" },
   // Settings
   { label: "Username", sub: "Change your unique username", tab: "settings", anchor: "s-username" },
   { label: "Alias", sub: "Secondary profile URL", tab: "settings", anchor: "s-alias" },
@@ -317,10 +325,57 @@ const SEARCH_INDEX: SearchResult[] = [
         </div>
 
         <nav className="nav2">
-          {filteredNav.map((item) => {
+          {/* Account Dropdown */}
+          <div className="navGroup2">
+            <button 
+              type="button"
+              className={`navGroupHeader2 ${accountOpen ? "open" : ""}`} 
+              onClick={() => setAccountOpen(!accountOpen)}
+            >
+              <span className="navGroupHeaderLeft2">
+                <User size={17} />
+                <span>Account</span>
+              </span>
+              {accountOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            </button>
+            
+            {accountOpen && (
+              <div className="navGroupSub2">
+                {[
+                  { tab: "overview", label: "Overview" },
+                  { tab: "analytics", label: "Analytics" },
+                  { tab: "badges", label: "Badges" },
+                  { tab: "settings", label: "Settings" }
+                ].map((item) => (
+                  <button 
+                    key={item.tab} 
+                    type="button"
+                    className={`navSubItem2 ${tab === item.tab ? "active" : ""}`} 
+                    onClick={() => setTab(item.tab as Tab)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Other links */}
+          {[
+            { tab: "customize", label: "Customize", icon: Brush },
+            { tab: "links", label: "Links", icon: LinkIcon },
+            { tab: "premium", label: "Premium", icon: Gem },
+            { tab: "imagehost", label: "Image Host", icon: ImageIcon },
+            { tab: "templates", label: "Templates", icon: Copy }
+          ].map((item) => {
             const Icon = item.icon;
             return (
-              <button key={item.tab} className={`navItem2 ${tab === item.tab ? "active" : ""}`} onClick={() => setTab(item.tab)}>
+              <button 
+                key={item.tab} 
+                type="button"
+                className={`navItem2 ${tab === item.tab ? "active" : ""}`} 
+                onClick={() => setTab(item.tab as Tab)}
+              >
                 <Icon size={17} />
                 <span>{item.label}</span>
               </button>
@@ -328,26 +383,92 @@ const SEARCH_INDEX: SearchResult[] = [
           })}
         </nav>
 
-        <div className="sidebarCard2">
-          <div className="sidebarMiniRow">
-            <Avatar url={p.avatar_url} shape={p.avatar_shape} />
-            <div>
+        {/* Support Card */}
+        <div className="supportCard2">
+          <small>Have a question or need support?</small>
+          <a className="supportBtn2 primary" href={DISCORD_INVITE_URL} target="_blank" rel="noreferrer">
+            <HelpCircle size={15} /> Help Center
+          </a>
+          <small style={{ marginTop: 8 }}>Check out your page</small>
+          <a className="supportBtn2 secondary" href={`/${p.username}`} target="_blank" rel="noreferrer">
+            <ExternalLink size={15} /> My Page
+          </a>
+        </div>
+
+        {/* Share profile Button */}
+        <button 
+          type="button"
+          className="shareProfileBtn2" 
+          onClick={() => {
+            navigator.clipboard?.writeText(publicUrl);
+            alert("Profile link copied to clipboard!");
+          }}
+        >
+          <Share2 size={15} /> Share Your Profile
+        </button>
+
+        {/* User profile bar & Quick Menu trigger */}
+        <div className="userFooter2" style={{ position: "relative" }}>
+          <div className="userFooterLeft2">
+            <div className="userFooterAvatar2" style={{ borderRadius: p.avatar_shape === "circle" ? "50%" : 8 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {p.avatar_url ? <img src={p.avatar_url} alt="" /> : <User size={18} />}
+            </div>
+            <div className="userFooterMeta2">
               <strong>{p.display_name || p.username}</strong>
-              <small>@{p.username}</small>
+              <small>UID {p.public_uid ? Number(p.public_uid).toLocaleString() : p.id.slice(0, 6)}</small>
             </div>
           </div>
-          <a className="ghostBtn" href={`/${p.username}`} target="_blank" rel="noreferrer">
-            <ExternalLink size={15} /> Open page
-          </a>
-          <a className="ghostBtn" href="/marketplace">
-            <ShoppingBag size={15} /> Marketplace
-          </a>
-          <button className="ghostBtn" onClick={() => navigator.clipboard?.writeText(publicUrl)}>
-            <Share2 size={15} /> Copy link
+          <button type="button" className="userFooterMenuTrigger2" onClick={() => setQuickMenuOpen(!quickMenuOpen)}>
+            <MoreHorizontal size={18} />
           </button>
-          <button className="ghostBtn" onClick={() => signOut()}>
-            <LogOut size={15} /> Sign out
-          </button>
+
+          {/* Quick Menu Popover */}
+          {quickMenuOpen && (
+            <>
+              <div className="quickMenuOverlay2" onClick={() => setQuickMenuOpen(false)} />
+              <div className="quickMenu2">
+                <div className="quickMenuHeader2">
+                  <h3>Quick Menu</h3>
+                  <p>Navigate quickly through sob.lol</p>
+                </div>
+                
+                <div className="quickMenuBody2">
+                  <button type="button" className="quickMenuItem2" onClick={() => { setTab("settings"); setQuickMenuOpen(false); }}>
+                    <div className="quickMenuLabel2">
+                      <User size={15} />
+                      <span>Switch Accounts</span>
+                    </div>
+                    <span className="quickMenuArrow2">→</span>
+                  </button>
+
+                  <div className="quickMenuLang2">
+                    <div className="quickMenuLangLeft2">
+                      <span className="langFlag2">🇺🇸</span>
+                      <span>English (US)</span>
+                    </div>
+                    <ChevronDown size={14} />
+                  </div>
+
+                  <a className="quickMenuBtn2 home" href="/" target="_blank" rel="noreferrer">
+                    <BrandMark size={14} /> Home
+                  </a>
+
+                  <a className="quickMenuBtn2 leaderboard" href="/marketplace">
+                    <ShoppingBag size={14} /> Marketplace
+                  </a>
+
+                  <a className="quickMenuBtn2 discord" href={DISCORD_INVITE_URL} target="_blank" rel="noreferrer">
+                    <MessageCircle size={14} /> Discord Server
+                  </a>
+
+                  <button type="button" className="quickMenuBtn2 logout" onClick={() => signOut()}>
+                    <LogOut size={14} /> Logout
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </aside>
 
@@ -380,10 +501,16 @@ const SEARCH_INDEX: SearchResult[] = [
         </div>
 
         {tab === "overview" && <Overview p={p} update={update} setTab={setTab} />}
-        {tab === "customize" && <Customize p={p} update={update} onUpload={onUpload} busy={busy} />}
+        {tab === "customize" && (
+          <div className="stack2">
+            <Customize p={p} update={update} onUpload={onUpload} busy={busy} />
+            <LayoutTab p={p} update={update} />
+            <MetadataTab p={p} update={update} onUpload={onUpload} busy={busy} />
+          </div>
+        )}
         {tab === "links" && <LinksTab p={p} update={update} />}
-        {tab === "layout" && <LayoutTab p={p} update={update} />}
-        {tab === "metadata" && <MetadataTab p={p} update={update} onUpload={onUpload} busy={busy} />}
+        {tab === "premium" && <PremiumTab />}
+        {tab === "imagehost" && <ImageHostTab p={p} />}
         {tab === "settings" && <SettingsTab p={p} update={update} />}
         {tab === "analytics" && <Analytics p={p} />}
         {tab === "badges" && <Badges p={p} update={update} isOwner={isOwner} />}
@@ -1550,25 +1677,64 @@ function completionItems(p: Profile) {
 
 const dashCss = `
 :root{--site-accent:#55acee;--site-accent-soft:rgba(85,172,238,.12)}
-.dash2{min-height:100vh;background:#09090b;color:#f4f4f5;display:grid;grid-template-columns:240px minmax(0,1fr);font-family:Inter,system-ui,sans-serif}
-.side2{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid #27272a;background:#141416;display:flex;flex-direction:column;gap:20px}
+.side2{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid #27272a;background:#0f0f11;display:flex;flex-direction:column;gap:16px}
 .brand2{display:flex;align-items:center;gap:10px;padding:0 4px;min-height:28px}
-.search2{display:flex;align-items:center;gap:10px;height:38px;border:1px solid #27272a;border-radius:8px;background:#09090b;padding:0 10px;color:#71717a;position:relative}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}
+.search2{display:flex;align-items:center;gap:10px;height:38px;border:1px solid #27272a;border-radius:8px;background:#18181b;padding:0 10px;color:#71717a;position:relative}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}
 .searchDrop2{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;background:#141416;border:1px solid #27272a;border-radius:10px;overflow:hidden;display:grid;gap:0}
 .searchDropItem2{display:grid;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #27272a;background:transparent;cursor:pointer;transition:background 0.1s ease;gap:2px}
 .searchDropItem2:last-child{border-bottom:0}
 .searchDropItem2:hover{background:#09090b}
 .searchDropLabel2{font-size:13px;font-weight:500;color:#f4f4f5}
 .searchDropSub2{font-size:11px;color:#71717a}
-.nav2{display:grid;gap:2px;overflow:auto;padding-right:4px}
-.navItem2{height:36px;border-left:2px solid transparent;background:transparent;color:#71717a;border-radius:0;display:flex;align-items:center;gap:10px;padding:0 12px 0 16px;cursor:pointer;text-align:left;font-weight:500;font-size:13px;transition:color 0.15s ease, border-color 0.15s ease}
-.navItem2:hover{color:#a1a1aa;background:transparent;border-color:transparent}
-.navItem2.active{color:#f4f4f5;border-left-color:var(--site-accent);background:transparent}
-.sidebarCard2{margin-top:auto;background:transparent;border:0;border-top:1px solid #27272a;border-radius:0;padding:16px 4px 0;display:grid;gap:8px}
-.sidebarMiniRow{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-.sidebarMiniRow strong,.sidebarMiniRow small{display:block;font-size:12px}
-.sidebarMiniRow strong{color:#f4f4f5;font-weight:500}
-.sidebarMiniRow small{color:#71717a}
+.nav2{display:grid;gap:8px;overflow:auto;padding-right:4px;margin-top:4px}
+.navItem2{height:38px;background:transparent;color:#a1a1aa;border:0;border-radius:8px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;text-align:left;font-weight:500;font-size:14px;transition:color 0.15s ease, background 0.15s ease}
+.navItem2:hover{color:#f4f4f5;background:#18181b}
+.navItem2.active{color:#f4f4f5;background:#18181b}
+.navGroup2{display:flex;flex-direction:column;gap:4px}
+.navGroupHeader2{height:38px;background:transparent;color:#a1a1aa;border:0;border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;cursor:pointer;font-weight:600;font-size:14px;transition:color 0.15s ease, background 0.15s ease}
+.navGroupHeader2:hover{color:#f4f4f5;background:#18181b}
+.navGroupHeader2.open{color:#f3e8ff;background:#2b1531}
+.navGroupHeaderLeft2{display:flex;align-items:center;gap:12px}
+.navGroupSub2{display:grid;gap:2px;padding-left:14px;margin-top:2px}
+.navSubItem2{height:32px;background:transparent;color:#71717a;border:0;border-left:2px solid #27272a;padding:0 16px;cursor:pointer;text-align:left;font-weight:500;font-size:13px;transition:color 0.15s ease, border-color 0.15s ease}
+.navSubItem2:hover{color:#a1a1aa;border-left-color:#3f3f46}
+.navSubItem2.active{color:#a855f7;border-left-color:#a855f7}
+.supportCard2{margin-top:auto;background:#18181b;border:1px solid #27272a;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.supportCard2 small{color:#71717a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.02em;text-align:left}
+.supportBtn2{display:flex;align-items:center;justify-content:center;gap:8px;height:34px;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;border:1px solid transparent;transition:opacity 0.15s}
+.supportBtn2:hover{opacity:0.9}
+.supportBtn2.primary{background:#20223c;border-color:rgba(99,102,241,0.25);color:#c7d2fe}
+.supportBtn2.secondary{background:#2b1531;border-color:rgba(168,85,247,0.25);color:#f3e8ff}
+.shareProfileBtn2{width:100%;border:0;background:#32193b;color:#f3e8ff;font-size:13px;font-weight:600;border-radius:9999px;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:background 0.15s}
+.shareProfileBtn2:hover{background:#42204e}
+.userFooter2{display:flex;align-items:center;justify-content:space-between;background:#18181b;border:1px solid #27272a;border-radius:9999px;padding:6px 12px;min-height:44px}
+.userFooterLeft2{display:flex;align-items:center;gap:10px;min-width:0}
+.userFooterAvatar2{width:30px;height:30px;border-radius:50%;background:#27272a;display:grid;place-items:center;overflow:hidden;flex:none}
+.userFooterAvatar2 img{width:100%;height:100%;object-fit:cover}
+.userFooterMeta2{display:flex;flex-direction:column;min-width:0;text-align:left}
+.userFooterMeta2 strong{color:#f4f4f5;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.userFooterMeta2 small{color:#71717a;font-size:10px}
+.userFooterMenuTrigger2{background:transparent;border:0;padding:4px;color:#71717a;cursor:pointer;transition:color 0.15s;display:flex;align-items:center;justify-content:center}
+.userFooterMenuTrigger2:hover{color:#f4f4f5}
+.quickMenuOverlay2{position:fixed;inset:0;z-index:999;cursor:default}
+.quickMenu2{position:absolute;bottom:calc(100% + 12px);right:0;width:220px;background:#141416;border:1px solid #27272a;border-radius:12px;box-shadow:0 10px 25px -5px rgba(0,0,0,0.6);padding:12px;z-index:1000;display:flex;flex-direction:column;gap:10px;text-align:left}
+.quickMenuHeader2{display:flex;flex-direction:column;gap:2px;border-bottom:1px solid #27272a;padding-bottom:8px}
+.quickMenuHeader2 h3{font-size:13px;font-weight:600;color:#f4f4f5;margin:0}
+.quickMenuHeader2 p{font-size:10px;color:#71717a;margin:0}
+.quickMenuBody2{display:flex;flex-direction:column;gap:6px}
+.quickMenuItem2{display:flex;align-items:center;justify-content:space-between;background:#1c1c1e;border:0;border-radius:8px;padding:8px 10px;color:#a1a1aa;cursor:pointer;transition:color 0.15s, background 0.15s;width:100%;text-align:left}
+.quickMenuItem2:hover{background:#2c2c2e;color:#f4f4f5}
+.quickMenuLabel2{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500}
+.quickMenuArrow2{font-size:12px;color:#71717a}
+.quickMenuLang2{display:flex;align-items:center;justify-content:space-between;background:#1c1c1e;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:500;color:#a1a1aa}
+.quickMenuLangLeft2{display:flex;align-items:center;gap:6px}
+.langFlag2{font-size:14px}
+.quickMenuBtn2{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;font-weight:600;text-decoration:none;padding:8px;border-radius:8px;text-align:center;border:1px solid transparent;cursor:pointer;width:100%;transition:opacity 0.15s}
+.quickMenuBtn2:hover{opacity:0.9}
+.quickMenuBtn2.home{background:#2b1531;border-color:rgba(168,85,247,0.15);color:#f3e8ff}
+.quickMenuBtn2.leaderboard{background:#2a1b0c;border-color:rgba(245,158,11,0.15);color:#fef3c7}
+.quickMenuBtn2.discord{background:#111a2e;border-color:rgba(59,130,246,0.15);color:#dbeafe}
+.quickMenuBtn2.logout{background:#270f11;border-color:rgba(239,68,68,0.15);color:#fee2e2;border:0}
 .main2{padding:32px 40px 48px;min-width:0}
 .topbar2{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:28px;position:sticky;top:0;background:#09090b;padding:4px 0 18px;border-bottom:1px solid #27272a;z-index:5}
 .topbar2 h1{font-size:22px;line-height:1.15;margin:0 0 6px;font-weight:600;letter-spacing:-0.02em;color:#f4f4f5}
@@ -1884,8 +2050,9 @@ select option{background:#09090b;color:#f4f4f5}
 .customizePreviewHead2 small{color:#71717a;margin-top:2px;font-size:12px}
 .customizePreviewHead2 a{width:32px;height:32px;border-radius:6px;background:#09090b;border:1px solid #27272a;display:grid;place-items:center;color:#71717a;transition:color 0.15s ease}
 .customizePreviewHead2 a:hover{color:#f4f4f5}
-.customizePreviewViewport2{height:600px;border-radius:6px;overflow:hidden;border:1px solid #27272a;background:#09090b;display:flex;flex-direction:column}
-.customizePreviewViewport2>*{flex:1;min-height:0;width:100%;height:100%;overflow:auto}
+.customizePreviewViewport2{height:auto;border-radius:6px;overflow:visible;border:1px solid #27272a;background:#09090b;display:flex;flex-direction:column}
+.customizePreviewViewport2>*{flex:1;min-height:unset;width:100%;height:auto;overflow:visible}
+.customizePreviewViewport2 .profile-page{min-height:unset;height:auto;padding:32px 16px;overflow:visible}
 .customizePreviewViewport2 iframe{border:0}
 .customizePreviewFooter2{display:flex;justify-content:space-between;color:#71717a;font-size:12px;padding:10px 4px 1px}
 .customizePreviewFooter2 span:last-child{text-transform:capitalize;color:#a1a1aa}
@@ -1906,11 +2073,11 @@ select option{background:#09090b;color:#f4f4f5}
 .avatar2.hexagon{clip-path:polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)}
 .avatar2.star{clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
 
-@media (max-width:1320px){.customizeShell2{grid-template-columns:minmax(0,1fr) 320px}.customizePreviewViewport2{height:540px}}
+@media (max-width:1320px){.customizeShell2{grid-template-columns:minmax(0,1fr) 320px}.customizePreviewViewport2{height:auto}}
 @media (max-width:1080px){
   .customizeShell2{grid-template-columns:1fr}
   .customizePreviewSticky2{position:relative;top:auto}
-  .customizePreviewViewport2{height:560px}
+  .customizePreviewViewport2{height:auto}
   .gunSection2 {
     display: block;
   }
@@ -1935,3 +2102,167 @@ select option{background:#09090b;color:#f4f4f5}
   .gunAssetGrid2,.gunGeneralGrid2,.gunColorGrid2{grid-template-columns:1fr}
 }
 `;
+
+function PremiumTab() {
+  return (
+    <div className="stack2">
+      <section className="card2">
+        <div className="cardHead2">
+          <h2>Premium Perks</h2>
+          <p>Unlock features, badges, and OGs with Premium upgrades.</p>
+        </div>
+        <div style={{ display: "grid", gap: 20 }}>
+          <div style={{ padding: 18, background: "#09090b", border: "1px solid #27272a", borderRadius: 8, display: "flex", flexDirection: "column", gap: 14 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 600, color: "#f4f4f5", margin: 0 }}>Unlocks &amp; Handles</h3>
+            <p style={{ color: "#71717a", fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+              By default, all 1-character and 2-character usernames are locked under our Premium plans. Some common gaming/tech OGs are also reserved. You can purchase them on the Marketplace or get access badges here.
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 4 }}>
+              <a className="primaryBtn" href="/marketplace" style={{ textDecoration: "none", height: 36, minHeight: "unset", fontSize: 13, padding: "0 16px" }}>
+                Visit Marketplace
+              </a>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16 }}>
+            <div style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#a855f7", marginBottom: 8 }}>
+                <Gem size={16} />
+                <strong style={{ fontSize: 14 }}>Premium Badges</strong>
+              </div>
+              <p style={{ color: "#71717a", fontSize: 12, lineHeight: 1.4, margin: 0 }}>
+                Get custom roles on our Discord server to display Donor, Supporter, and OG badges on your public bio link.
+              </p>
+            </div>
+            <div style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#55acee", marginBottom: 8 }}>
+                <Brush size={16} />
+                <strong style={{ fontSize: 14 }}>Visual Styles</strong>
+              </div>
+              <p style={{ color: "#71717a", fontSize: 12, lineHeight: 1.4, margin: 0 }}>
+                Access interactive screen effects (like matrix glow, snow, rain, and CRT TV filters) along with custom cursor tracking.
+              </p>
+            </div>
+            <div style={{ background: "#18181b", border: "1px solid #27272a", borderRadius: 8, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#fb7185", marginBottom: 8 }}>
+                <Music size={16} />
+                <strong style={{ fontSize: 14 }}>Media Integrations</strong>
+              </div>
+              <p style={{ color: "#71717a", fontSize: 12, lineHeight: 1.4, margin: 0 }}>
+                Upload multiple background audio tracks, configure Spotify cover cards, and link your live Github profile status.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ImageHostTab({ p }: { p: Profile }) {
+  const [images, setImages] = useState<any[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const supabase = createClient();
+
+  const loadImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("hosted_images")
+        .select("*")
+        .eq("user_id", p.id)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setImages(data || []);
+    } catch (e: any) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    loadImages();
+  }, []);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError("");
+    try {
+      await uploadHostedImage(p.id, file);
+      await loadImages();
+    } catch (err: any) {
+      setError(err.message || "Failed to upload image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (img: any) => {
+    if (!window.confirm("Are you sure you want to delete this hosted image?")) return;
+    try {
+      await deleteHostedImage(img.path, img.id);
+      await loadImages();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete image.");
+    }
+  };
+
+  const formatSize = (bytes: number) => {
+    if (!bytes) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  return (
+    <div className="stack2">
+      <section className="card2">
+        <div className="cardHead2">
+          <h2>Image Host</h2>
+          <p>Upload and host custom assets to use on your bio card or links.</p>
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {error && <div style={{ color: "#ef4444", fontSize: 13 }}>{error}</div>}
+          <label className="uploadArea2" style={{ cursor: uploading ? "not-allowed" : "pointer" }}>
+            <input type="file" accept="image/*" onChange={handleUpload} disabled={uploading} style={{ display: "none" }} />
+            {uploading ? (
+              <Loader2 className="spinner spin" size={24} />
+            ) : (
+              <Upload size={24} style={{ color: "#a1a1aa", marginBottom: 8 }} />
+            )}
+            <strong style={{ display: "block", marginTop: 4 }}>{uploading ? "Uploading image..." : "Upload hosted image"}</strong>
+            <small style={{ color: "#71717a", fontSize: 12 }}>Supports PNG, JPG, WEBP, GIF. Max 5MB.</small>
+          </label>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16, marginTop: 12 }}>
+            {images.map((img) => (
+              <div key={img.id} className="hostedCard" style={{ background: "#141416", border: "1px solid #27272a", borderRadius: 8, padding: 12, display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ width: "100%", height: 120, background: "#09090b", borderRadius: 6, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={img.url} alt="" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+                </div>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "#f4f4f5", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{img.name}</div>
+                  <div style={{ fontSize: 11, color: "#71717a", marginTop: 2 }}>{formatSize(img.size)}</div>
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button type="button" className="primaryBtn soft" style={{ flex: 1, padding: "6px 0", fontSize: 12, height: "auto", minHeight: "unset" }} onClick={() => {
+                    navigator.clipboard.writeText(img.url);
+                    alert("Public URL copied to clipboard!");
+                  }}>Copy URL</button>
+                  <button type="button" className="dangerBtn" style={{ padding: "6px 10px", fontSize: 12, height: "auto", minHeight: "unset", background: "rgba(239, 68, 68, 0.15)", border: "1px solid rgba(239, 68, 68, 0.3)", color: "#ef4444", cursor: "pointer", borderRadius: 6 }} onClick={() => handleDelete(img)}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {images.length === 0 && !uploading && (
+            <div className="empty2">No hosted images yet. Upload one above to get started!</div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
