@@ -416,18 +416,20 @@ select {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: #0f0f11;
+  border: 1px solid #27272a;
   border-radius: 10px;
   padding: 6px;
   width: min(420px, 100%);
+  transition: border-color 0.2s ease;
 }
-.claim-form:focus-within { border-color: #3f3f46; }
+.claim-form:focus-within { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,0.1); }
 .claim-prefix {
   color: var(--faint);
   padding-left: 10px;
   font-size: 14px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
 }
 .claim-form input {
   flex: 1;
@@ -440,17 +442,25 @@ select {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   height: 36px;
 }
+.claim-btn {
+  height: 36px !important;
+  padding: 0 18px !important;
+  background: #a855f7 !important;
+  border: none !important;
+  flex: none;
+}
+.claim-btn:hover { background: #9333ea !important; }
 .claim-note {
   margin-top: 14px;
   font-size: 13px;
   color: var(--faint);
 }
 .claim-note a {
-  color: var(--muted);
+  color: #a855f7;
   font-weight: 500;
   text-decoration: none;
 }
-.claim-note a:hover { color: var(--text); }
+.claim-note a:hover { color: #c084fc; text-decoration: underline; }
 
 .land-actions {
   display: flex;
@@ -465,30 +475,61 @@ select {
   margin-top: 64px;
 }
 .land-point {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 18px 16px;
+  background: #0f0f11;
+  border: 1px solid #1f1f23;
+  border-radius: 12px;
+  padding: 22px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.2s ease;
+}
+.land-point:hover {
+  border-color: #2e2e34;
+}
+.land-point-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-bottom: 2px;
 }
 .land-point b {
   display: block;
   font-size: 14px;
   font-weight: 600;
   color: var(--text);
-  margin-bottom: 6px;
+  margin: 0;
 }
 .land-point span {
   display: block;
   font-size: 13px;
   color: var(--dim);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .land-preview {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
   padding: 14px;
+  isolation: isolate;
+}
+.land-preview-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(-45deg, #09090b, #120e22, #0a1322, #09090b);
+  background-size: 400% 400%;
+  animation: animated-gradient 18s ease infinite;
+  z-index: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.land-preview > * {
+  position: relative;
+  z-index: 1;
 }
 .land-preview-label {
   display: flex;
@@ -498,8 +539,15 @@ select {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: rgba(255,255,255,0.35);
   padding: 2px 4px 12px;
+}
+.land-preview-card {
+  background: linear-gradient(135deg, rgba(20, 20, 23, 0.6) 0%, rgba(9, 9, 11, 0.75) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 10px !important;
 }
 
 .land-footer {
