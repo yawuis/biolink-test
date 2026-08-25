@@ -830,6 +830,32 @@ function LinksTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>)
 function LayoutTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>) => void }) {
   const modules = p.modules || [];
   const toggleMod = (key: string) => update({ modules: modules.includes(key) ? modules.filter((m) => m !== key) : [...modules, key] });
+  const isPremium = p.owned_badges?.includes("premium");
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    if (!isPremium) return;
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (!isPremium || draggedIndex === null || draggedIndex === index) return;
+    
+    const items = [...modules];
+    const draggedItem = items[draggedIndex];
+    items.splice(draggedIndex, 1);
+    items.splice(index, 0, draggedItem);
+    
+    setDraggedIndex(index);
+    update({ modules: items });
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   return (
     <div className="stack2">
@@ -846,18 +872,110 @@ function LayoutTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>
           </div>
         </section>
 
-        <section id="s-modules" className="card2">
-          <div className="cardHead2"><h2>Module visibility</h2><p>Local time uses the visitor's local clock, so no timezone setting is needed.</p></div>
-          <div className="moduleList2">
-            {ALL_MODULES.map((moduleKey) => (
-              <button key={moduleKey} className={`moduleBtn2 ${modules.includes(moduleKey) ? "active" : ""}`} onClick={() => toggleMod(moduleKey)}>
-                <div>
-                  <strong>{MODULE_META[moduleKey]}</strong>
-                  <small>{modules.includes(moduleKey) ? "Visible" : "Hidden"}</small>
+        <section id="s-modules" className="card2" style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div>
+            <div className="cardHead2" style={{ marginBottom: 12 }}>
+              <h2>Module visibility</h2>
+              <p>Toggle which modules are visible on your profile.</p>
+            </div>
+            <div className="moduleList2">
+              {ALL_MODULES.map((moduleKey) => (
+                <button key={moduleKey} className={`moduleBtn2 ${modules.includes(moduleKey) ? "active" : ""}`} onClick={() => toggleMod(moduleKey)}>
+                  <div>
+                    <strong>{MODULE_META[moduleKey]}</strong>
+                    <small>{modules.includes(moduleKey) ? "Visible" : "Hidden"}</small>
+                  </div>
+                  <span>{modules.includes(moduleKey) ? "On" : "Off"}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="cardHead2" style={{ marginBottom: 12 }}>
+              <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span>Module Arrangement</span>
+                {!isPremium && (
+                  <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(168,85,247,0.15)", color: "#a855f7", padding: "2px 8px", borderRadius: 9999, textTransform: "uppercase" }}>
+                    💎 Premium
+                  </span>
+                )}
+              </h2>
+              <p>Drag and drop the active modules below to rearrange them on your page.</p>
+            </div>
+            
+            <div style={{ display: "grid", gap: 8, position: "relative" }}>
+              {modules.map((m, idx) => (
+                <div
+                  key={m}
+                  draggable={isPremium}
+                  onDragStart={(e) => handleDragStart(e, idx)}
+                  onDragOver={(e) => handleDragOver(e, idx)}
+                  onDragEnd={handleDragEnd}
+                  style={{
+                    background: "#09090b",
+                    border: draggedIndex === idx ? "1px dashed #a855f7" : "1px solid #27272a",
+                    borderRadius: 8,
+                    padding: "12px 16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    cursor: isPremium ? "grab" : "not-allowed",
+                    opacity: draggedIndex === idx ? 0.6 : 1,
+                    transition: "border-color 0.15s, opacity 0.15s",
+                    userSelect: "none",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <span style={{ color: "#71717a", fontSize: 16 }}>⋮⋮</span>
+                    <strong style={{ fontSize: 13, fontWeight: 500, color: "#e4e4e7" }}>{MODULE_META[m] || m}</strong>
+                  </div>
+                  <small style={{ color: "#71717a", fontSize: 11 }}>
+                    {isPremium ? "Drag to reorder" : "Rearrange locked"}
+                  </small>
                 </div>
-                <span>{modules.includes(moduleKey) ? "On" : "Off"}</span>
-              </button>
-            ))}
+              ))}
+              
+              {modules.length === 0 && (
+                <div className="empty2">No active modules to rearrange. Toggle modules on above first!</div>
+              )}
+              
+              {!isPremium && modules.length > 0 && (
+                <div style={{
+                  position: "absolute",
+                  inset: -6,
+                  background: "rgba(9, 9, 11, 0.78)",
+                  backdropFilter: "blur(2.5px)",
+                  borderRadius: 10,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 12,
+                  zIndex: 10,
+                  border: "1px solid rgba(168, 85, 247, 0.2)",
+                  padding: 16,
+                  textAlign: "center"
+                }}>
+                  <strong style={{ fontSize: 14, color: "#f4f4f5" }}>Unlock Module Rearranging</strong>
+                  <p style={{ fontSize: 12, color: "#a1a1aa", margin: "0 0 4px", maxWidth: 260, lineHeight: 1.4 }}>
+                    Upgrade to Premium to drag and drop your profile modules in any order.
+                  </p>
+                  <a href="/marketplace" style={{
+                    background: "#a855f7",
+                    color: "#ffffff",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    padding: "6px 16px",
+                    borderRadius: 6,
+                    textDecoration: "none",
+                    transition: "background 0.15s"
+                  }}>
+                    Go to Marketplace
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </div>

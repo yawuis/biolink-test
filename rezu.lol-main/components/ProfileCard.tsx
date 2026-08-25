@@ -25,34 +25,40 @@ import { SITE_NAME, type Profile } from "@/lib/constants";
 
 function ModuleCards({ profile, cardStyle }: { profile: Profile; cardStyle?: React.CSSProperties }) {
   const modules = profile.modules || [];
-  const showDiscord = modules.includes("discord") && (!!profile.discord_enabled || !!profile.discord_id);
-  const showGithub = modules.includes("github") && !!profile.github_user;
-  const showSpotify = modules.includes("spotify") && !!profile.spotify_url;
-  const showClock = modules.includes("clock");
-  if (!showDiscord && !showGithub && !showSpotify && !showClock) return null;
 
   return (
     <>
-      {showDiscord && (
-        <article className="profile-card no-banner" style={cardStyle}>
-          <DiscordCard profile={profile} />
-        </article>
-      )}
-      {showGithub && (
-        <article className="profile-card no-banner" style={cardStyle}>
-          <GithubCard profile={profile} />
-        </article>
-      )}
-      {showSpotify && (
-        <article className="profile-card no-banner" style={cardStyle}>
-          <SpotifyCard profile={profile} />
-        </article>
-      )}
-      {showClock && (
-        <article className="profile-card no-banner" style={cardStyle}>
-          <Clock profile={profile} />
-        </article>
-      )}
+      {modules.map((m) => {
+        if (m === "discord" && (!!profile.discord_enabled || !!profile.discord_id)) {
+          return (
+            <article key="discord" className="profile-card no-banner" style={cardStyle}>
+              <DiscordCard profile={profile} />
+            </article>
+          );
+        }
+        if (m === "github" && !!profile.github_user) {
+          return (
+            <article key="github" className="profile-card no-banner" style={cardStyle}>
+              <GithubCard profile={profile} />
+            </article>
+          );
+        }
+        if (m === "spotify" && !!profile.spotify_url) {
+          return (
+            <article key="spotify" className="profile-card no-banner" style={cardStyle}>
+              <SpotifyCard profile={profile} />
+            </article>
+          );
+        }
+        if (m === "clock") {
+          return (
+            <article key="clock" className="profile-card no-banner" style={cardStyle}>
+              <Clock profile={profile} />
+            </article>
+          );
+        }
+        return null;
+      })}
     </>
   );
 }
