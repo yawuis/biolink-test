@@ -531,6 +531,8 @@ function Overview({ p, update, setTab, isPremium }: { p: Profile; update: (patch
   const completion = completionItems(p);
   const complete = completion.filter((item) => item.ok).length;
   const percent = Math.round((complete / completion.length) * 100);
+  const [identityOpen, setIdentityOpen] = useState(true);
+  const [checklistOpen, setChecklistOpen] = useState(false);
 
   return (
     <div className="stack2" style={{ gap: 24 }}>
@@ -605,84 +607,117 @@ function Overview({ p, update, setTab, isPremium }: { p: Profile; update: (patch
         <div style={{ display: "grid", gap: 24 }}>
           {/* Quick Settings Form */}
           <section id="s-quickedit" className="card2" style={{ padding: 20, margin: 0 }}>
-            <div className="cardHead2" style={{ marginBottom: 16 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 600 }}>Profile Identity</h2>
-              <p style={{ margin: 0, fontSize: 12, color: "#71717a" }}>Instantly customize your primary display details.</p>
+            <div 
+              onClick={() => setIdentityOpen(!identityOpen)}
+              style={{ 
+                cursor: "pointer", 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center" 
+              }}
+            >
+              <div className="cardHead2" style={{ marginBottom: 0 }}>
+                <h2 style={{ fontSize: 15, fontWeight: 600 }}>Profile Identity</h2>
+                <p style={{ margin: 0, fontSize: 12, color: "#71717a" }}>Instantly customize your primary display details.</p>
+              </div>
+              <div style={{ color: "#71717a" }}>
+                {identityOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </div>
             </div>
-            <div style={{ display: "grid", gap: 12 }}>
-              <Field label="Display name" value={p.display_name || ""} onChange={(v) => update({ display_name: v })} />
-              <Field label="Location" value={p.location || ""} onChange={(v) => update({ location: v })} />
-              <Field label="Pronouns" value={p.pronouns || ""} onChange={(v) => update({ pronouns: v })} />
-              <ColorField label="Profile accent" help="Only changes profile cards and glow." value={p.accent || "#55acee"} onChange={(v) => update({ accent: v })} />
-              <Textarea label="Bio" value={p.bio || ""} onChange={(v) => update({ bio: v })} />
-            </div>
+            
+            {identityOpen && (
+              <div style={{ display: "grid", gap: 12, marginTop: 16 }}>
+                <Field label="Display name" value={p.display_name || ""} onChange={(v) => update({ display_name: v })} />
+                <Field label="Location" value={p.location || ""} onChange={(v) => update({ location: v })} />
+                <Field label="Pronouns" value={p.pronouns || ""} onChange={(v) => update({ pronouns: v })} />
+                <ColorField label="Profile accent" help="Only changes profile cards and glow." value={p.accent || "#55acee"} onChange={(v) => update({ accent: v })} />
+                <Textarea label="Bio" value={p.bio || ""} onChange={(v) => update({ bio: v })} />
+              </div>
+            )}
           </section>
 
           {/* Profile checklist */}
           <section id="s-checklist" className="card2" style={{ padding: 20, margin: 0 }}>
-            <div className="cardHead2" style={{ marginBottom: 14 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 600 }}>Profile Checklist</h2>
-              <p style={{ margin: 0, fontSize: 12, color: "#71717a" }}>
-                {percent === 100 ? "Your profile is fully optimized!" : `${percent}% complete — finish checklist items to unlock tags.`}
-              </p>
+            <div 
+              onClick={() => setChecklistOpen(!checklistOpen)}
+              style={{ 
+                cursor: "pointer", 
+                display: "flex", 
+                justifyContent: "space-between", 
+                alignItems: "center" 
+              }}
+            >
+              <div className="cardHead2" style={{ marginBottom: 0, flex: 1 }}>
+                <h2 style={{ fontSize: 15, fontWeight: 600 }}>Profile Checklist</h2>
+                <p style={{ margin: 0, fontSize: 12, color: "#71717a" }}>
+                  {percent === 100 ? "Your profile is fully optimized!" : `${percent}% complete — finish checklist items to unlock tags.`}
+                </p>
+              </div>
+              <div style={{ color: "#71717a", marginLeft: 16 }}>
+                {checklistOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </div>
             </div>
             
-            {/* Completion Bar */}
-            <div className="completionBar2" style={{ height: 6, background: "#1f1f23", borderRadius: 9999, overflow: "hidden", marginBottom: 16 }}>
-              <div style={{ width: `${percent}%`, height: "100%", background: "#55acee", transition: "width 0.3s ease" }} />
-            </div>
+            {checklistOpen && (
+              <div style={{ marginTop: 16 }}>
+                {/* Completion Bar */}
+                <div className="completionBar2" style={{ height: 6, background: "#1f1f23", borderRadius: 9999, overflow: "hidden", marginBottom: 16 }}>
+                  <div style={{ width: `${percent}%`, height: "100%", background: "#55acee", transition: "width 0.3s ease" }} />
+                </div>
 
-            <div style={{ display: "grid", gap: 1, borderRadius: 10, overflow: "hidden", border: "1px solid #1f1f23" }}>
-              {completion.map((item) => (
-                <div
-                  key={item.key}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "10px 14px",
-                    background: "rgba(255,255,255,0.015)",
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "grid", gap: 1, borderRadius: 10, overflow: "hidden", border: "1px solid #1f1f23" }}>
+                  {completion.map((item) => (
                     <div
+                      key={item.key}
                       style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: "50%",
-                        border: item.ok ? "1px solid #55acee" : "1px solid #3f3f46",
-                        background: item.ok ? "#55acee" : "transparent",
-                        color: item.ok ? "#000" : "transparent",
-                        display: "grid",
-                        placeItems: "center",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px 14px",
+                        background: "rgba(255,255,255,0.015)",
+                        borderBottom: "1px solid rgba(255,255,255,0.04)",
                       }}
                     >
-                      {item.ok && <Check size={10} strokeWidth={3} />}
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        <div
+                          style={{
+                            width: 18,
+                            height: 18,
+                            borderRadius: "50%",
+                            border: item.ok ? "1px solid #55acee" : "1px solid #3f3f46",
+                            background: item.ok ? "#55acee" : "transparent",
+                            color: item.ok ? "#000" : "transparent",
+                            display: "grid",
+                            placeItems: "center",
+                          }}
+                        >
+                          {item.ok && <Check size={10} strokeWidth={3} />}
+                        </div>
+                        <div>
+                          <strong style={{ fontSize: 12, color: item.ok ? "#f4f4f5" : "#a1a1aa", display: "block", fontWeight: 500 }}>{item.label}</strong>
+                          <span style={{ fontSize: 10, color: "#71717a" }}>{item.help}</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setTab(item.tab)}
+                        style={{
+                          fontSize: 10,
+                          background: item.ok ? "rgba(85,172,238,0.08)" : "#141416",
+                          color: item.ok ? "#55acee" : "#a1a1aa",
+                          border: "1px solid #1f1f23",
+                          padding: "4px 8px",
+                          borderRadius: 6,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {item.ok ? "View" : "Set Up"}
+                      </button>
                     </div>
-                    <div>
-                      <strong style={{ fontSize: 12, color: item.ok ? "#f4f4f5" : "#a1a1aa", display: "block", fontWeight: 500 }}>{item.label}</strong>
-                      <span style={{ fontSize: 10, color: "#71717a" }}>{item.help}</span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setTab(item.tab)}
-                    style={{
-                      fontSize: 10,
-                      background: item.ok ? "rgba(85,172,238,0.08)" : "#141416",
-                      color: item.ok ? "#55acee" : "#a1a1aa",
-                      border: "1px solid #1f1f23",
-                      padding: "4px 8px",
-                      borderRadius: 6,
-                      fontWeight: 600,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {item.ok ? "View" : "Set Up"}
-                  </button>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </section>
         </div>
       </div>
