@@ -138,7 +138,7 @@ export default async function Home() {
                 <form action="/signup" method="get" className="claim-form">
                   <span className="claim-prefix">
                     {name}
-                    <span style={{ color: "#a855f7" }}>{tld}</span>/
+                    <span style={{ color: "#55acee" }}>{tld}</span>/
                   </span>
                   <input name="username" placeholder="yourname" autoComplete="off" aria-label="Username" />
                   <button type="submit" className="btn-primary claim-btn">
@@ -157,7 +157,7 @@ export default async function Home() {
 
         <section className="land-points">
           <div className="land-point">
-            <div className="land-point-icon" style={{ background: "rgba(168,85,247,0.1)", color: "#a855f7" }}>
+            <div className="land-point-icon" style={{ background: "rgba(85,172,238,0.1)", color: "#55acee" }}>
               <Shield size={18} />
             </div>
             <b>A name that&apos;s yours</b>

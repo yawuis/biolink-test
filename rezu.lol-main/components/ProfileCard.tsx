@@ -32,7 +32,8 @@ function ModuleCards({
   cardStyle?: React.CSSProperties;
   onRearrange?: (modules: string[]) => void;
 }) {
-  const modules = profile.modules || [];
+  const rawModules = profile.modules || [];
+  const modules = rawModules.map((m) => (m.includes(":") ? m.split(":")[0] : m));
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const handleDragStart = (e: React.DragEvent, index: number) => {
@@ -45,7 +46,7 @@ function ModuleCards({
     e.preventDefault();
     if (!onRearrange || draggedIndex === null || draggedIndex === index) return;
 
-    const items = [...modules];
+    const items = [...rawModules];
     const draggedItem = items[draggedIndex];
     items.splice(draggedIndex, 1);
     items.splice(index, 0, draggedItem);
@@ -60,7 +61,7 @@ function ModuleCards({
 
   return (
     <>
-      {modules.map((m, idx) => {
+      {modules.map((key, idx) => {
         const isDraggingThis = draggedIndex === idx;
         const dragProps = onRearrange
           ? {
@@ -72,7 +73,7 @@ function ModuleCards({
                 ...cardStyle,
                 cursor: "grab",
                 opacity: isDraggingThis ? 0.5 : 1,
-                border: isDraggingThis ? "1px dashed var(--accent, #a855f7)" : cardStyle?.border,
+                border: isDraggingThis ? "1px dashed var(--accent, #55acee)" : cardStyle?.border,
                 transition: "transform 0.15s, opacity 0.15s",
               },
             }
@@ -80,28 +81,28 @@ function ModuleCards({
               style: cardStyle,
             };
 
-        if (m === "discord" && (!!profile.discord_enabled || !!profile.discord_id)) {
+        if (key === "discord" && (!!profile.discord_enabled || !!profile.discord_id)) {
           return (
             <article key="discord" className="profile-card no-banner" {...dragProps}>
               <DiscordCard profile={profile} />
             </article>
           );
         }
-        if (m === "github" && !!profile.github_user) {
+        if (key === "github" && !!profile.github_user) {
           return (
             <article key="github" className="profile-card no-banner" {...dragProps}>
               <GithubCard profile={profile} />
             </article>
           );
         }
-        if (m === "spotify" && !!profile.spotify_url) {
+        if (key === "spotify" && !!profile.spotify_url) {
           return (
             <article key="spotify" className="profile-card no-banner" {...dragProps}>
               <SpotifyCard profile={profile} />
             </article>
           );
         }
-        if (m === "clock") {
+        if (key === "clock") {
           return (
             <article key="clock" className="profile-card no-banner" {...dragProps}>
               <Clock profile={profile} />
@@ -115,7 +116,7 @@ function ModuleCards({
 }
 
 function hasModules(profile: Profile) {
-  const modules = profile.modules || [];
+  const modules = (profile.modules || []).map((m) => (m.includes(":") ? m.split(":")[0] : m));
   return (
     (modules.includes("discord") && (!!profile.discord_enabled || !!profile.discord_id)) ||
     (modules.includes("github") && !!profile.github_user) ||

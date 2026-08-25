@@ -843,8 +843,15 @@ function LinksTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>)
 }
 
 function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Partial<Profile>) => void; isPremium: boolean }) {
-  const modules = p.modules || [];
-  const toggleMod = (key: string) => update({ modules: modules.includes(key) ? modules.filter((m) => m !== key) : [...modules, key] });
+  const rawModules = p.modules || [];
+  const modules = rawModules.map((m) => (m.includes(":") ? m.split(":")[0] : m));
+  const toggleMod = (key: string) => {
+    const active = modules.includes(key);
+    const next = active
+      ? rawModules.filter((m) => (m.includes(":") ? m.split(":")[0] : m) !== key)
+      : [...rawModules, key];
+    update({ modules: next });
+  };
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -858,7 +865,7 @@ function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Parti
     e.preventDefault();
     if (!isPremium || draggedIndex === null || draggedIndex === index) return;
     
-    const items = [...modules];
+    const items = [...rawModules];
     const draggedItem = items[draggedIndex];
     items.splice(draggedIndex, 1);
     items.splice(index, 0, draggedItem);
@@ -907,15 +914,38 @@ function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Parti
 
           <div>
             <div className="cardHead2" style={{ marginBottom: 12 }}>
-              <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <span>Module Arrangement</span>
-                {!isPremium && (
-                  <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(168,85,247,0.15)", color: "#a855f7", padding: "2px 8px", borderRadius: 9999, textTransform: "uppercase" }}>
-                    💎 Premium
-                  </span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
+                <div>
+                  <h2 style={{ display: "flex", alignItems: "center", gap: 8, margin: 0 }}>
+                    <span>Module Arrangement</span>
+                    {!isPremium && (
+                      <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(85,172,238,0.15)", color: "#55acee", padding: "2px 8px", borderRadius: 9999, textTransform: "uppercase" }}>
+                        💎 Premium
+                      </span>
+                    )}
+                  </h2>
+                  <p style={{ margin: "6px 0 0 0" }}>Drag and drop the active modules below to rearrange them on your page.</p>
+                </div>
+                {isPremium && (
+                  <Link href="/rearrange" style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    background: "#14223c",
+                    border: "1px solid rgba(85, 172, 238, 0.2)",
+                    color: "#55acee",
+                    fontSize: 12,
+                    fontWeight: 600,
+                    padding: "6px 14px",
+                    borderRadius: 8,
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                    transition: "all 0.2s ease"
+                  }}>
+                    ✨ Rearrange Fullscreen
+                  </Link>
                 )}
-              </h2>
-              <p>Drag and drop the active modules below to rearrange them on your page.</p>
+              </div>
             </div>
             
             <div style={{ display: "grid", gap: 8, position: "relative" }}>
@@ -928,7 +958,7 @@ function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Parti
                   onDragEnd={handleDragEnd}
                   style={{
                     background: "#09090b",
-                    border: draggedIndex === idx ? "1px dashed #a855f7" : "1px solid #27272a",
+                    border: draggedIndex === idx ? "1px dashed #55acee" : "1px solid #27272a",
                     borderRadius: 8,
                     padding: "12px 16px",
                     display: "flex",
@@ -967,7 +997,7 @@ function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Parti
                   justifyContent: "center",
                   gap: 12,
                   zIndex: 10,
-                  border: "1px solid rgba(168, 85, 247, 0.2)",
+                  border: "1px solid rgba(85, 172, 238, 0.2)",
                   padding: 16,
                   textAlign: "center"
                 }}>
@@ -976,7 +1006,7 @@ function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Parti
                     Upgrade to Premium to drag and drop your profile modules in any order.
                   </p>
                   <a href="/marketplace" style={{
-                    background: "#a855f7",
+                    background: "#55acee",
                     color: "#ffffff",
                     fontSize: 12,
                     fontWeight: 600,
@@ -1807,11 +1837,11 @@ function completionItems(p: Profile) {
 }
 
 const dashCss = `
-:root{--site-accent:#a855f7;--site-accent-soft:rgba(168,85,247,0.12)}
-.dash2{min-height:100vh;background:radial-gradient(circle at 80% 20%, rgba(168,85,247,0.06), transparent 50%), #09090b;color:#f4f4f5;display:grid;grid-template-columns:250px minmax(0,1fr);font-family:Inter,system-ui,sans-serif}
+:root{--site-accent:#55acee;--site-accent-soft:rgba(85,172,238,0.12)}
+.dash2{min-height:100vh;background:radial-gradient(circle at 80% 20%, rgba(85,172,238,0.06), transparent 50%), #09090b;color:#f4f4f5;display:grid;grid-template-columns:250px minmax(0,1fr);font-family:Inter,system-ui,sans-serif}
 .side2{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid #1f1f23;background:#0c0c0e;display:flex;flex-direction:column;gap:18px;overflow-y:auto}
 .brand2{display:flex;align-items:center;gap:10px;padding:0 4px;min-height:28px}
-.search2{display:flex;align-items:center;gap:10px;height:38px;border:1px solid #1f1f23;border-radius:8px;background:#141416;padding:0 10px;color:#71717a;position:relative;transition:border-color 0.15s ease}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}.search2:focus-within{border-color:#a855f7}
+.search2{display:flex;align-items:center;gap:10px;height:38px;border:1px solid #1f1f23;border-radius:8px;background:#141416;padding:0 10px;color:#71717a;position:relative;transition:border-color 0.15s ease}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}.search2:focus-within{border-color:#55acee}
 .searchDrop2{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;background:#141416;border:1px solid #1f1f23;border-radius:10px;overflow:hidden;display:grid;gap:0;box-shadow:0 10px 30px rgba(0,0,0,0.5)}
 .searchDropItem2{display:grid;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #1f1f23;background:transparent;cursor:pointer;transition:background 0.1s ease;gap:2px}
 .searchDropItem2:last-child{border-bottom:0}
@@ -1821,24 +1851,24 @@ const dashCss = `
 .nav2{display:grid;gap:6px;overflow:auto;padding-right:4px;margin-top:4px}
 .navItem2{height:38px;background:transparent;color:#a1a1aa;border:0;border-radius:8px;display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer;text-align:left;font-weight:500;font-size:14px;transition:color 0.15s ease, background 0.15s ease}
 .navItem2:hover{color:#f4f4f5;background:#141416}
-.navItem2.active{color:#f4f4f5;background:#1c192c;border:1px solid rgba(168,85,247,0.15)}
+.navItem2.active{color:#f4f4f5;background:#14223c;border:1px solid rgba(85,172,238,0.15)}
 .navGroup2{display:flex;flex-direction:column;gap:4px}
 .navGroupHeader2{height:38px;background:transparent;color:#a1a1aa;border:0;border-radius:8px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;cursor:pointer;font-weight:600;font-size:14px;transition:color 0.15s ease, background 0.15s ease}
 .navGroupHeader2:hover{color:#f4f4f5;background:#141416}
-.navGroupHeader2.open{color:#f3e8ff;background:#1c192c;border:1px solid rgba(168,85,247,0.15)}
+.navGroupHeader2.open{color:#dbeafe;background:#14223c;border:1px solid rgba(85,172,238,0.15)}
 .navGroupHeaderLeft2{display:flex;align-items:center;gap:12px}
 .navGroupSub2{display:grid;gap:2px;padding-left:14px;margin-top:2px}
 .navSubItem2{height:32px;background:transparent;color:#71717a;border:0;border-left:2px solid #1f1f23;padding:0 16px;cursor:pointer;text-align:left;font-weight:500;font-size:13px;transition:color 0.15s ease, border-color 0.15s ease}
 .navSubItem2:hover{color:#a1a1aa;border-left-color:#3f3f46}
-.navSubItem2.active{color:#a855f7;border-left-color:#a855f7;font-weight:600}
+.navSubItem2.active{color:#55acee;border-left-color:#55acee;font-weight:600}
 .supportCard2{margin-top:auto;background:#0c0c0e;border:1px solid #1f1f23;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .supportCard2 small{color:#71717a;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;text-align:left}
 .supportBtn2{display:flex;align-items:center;justify-content:center;gap:8px;height:34px;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;border:1px solid transparent;transition:all 0.2s ease}
 .supportBtn2:hover{transform:translateY(-1px);filter:brightness(1.1)}
 .supportBtn2.primary{background:#111224;border-color:rgba(99,102,241,0.2);color:#c7d2fe}
-.supportBtn2.secondary{background:#1a1122;border-color:rgba(168,85,247,0.2);color:#f3e8ff}
-.shareProfileBtn2{width:100%;border:0;background:#a855f7;color:#ffffff;font-size:13px;font-weight:600;border-radius:9999px;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all 0.2s ease}
-.shareProfileBtn2:hover{background:#9333ea;transform:translateY(-1px);box-shadow:0 4px 12px rgba(168,85,247,0.25)}
+.supportBtn2.secondary{background:#14223c;border-color:rgba(85,172,238,0.2);color:#dbeafe}
+.shareProfileBtn2{width:100%;border:0;background:#55acee;color:#ffffff;font-size:13px;font-weight:600;border-radius:9999px;height:38px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all 0.2s ease}
+.shareProfileBtn2:hover{background:#3b8ec2;transform:translateY(-1px);box-shadow:0 4px 12px rgba(85,172,238,0.25)}
 .userFooter2{display:flex;align-items:center;justify-content:space-between;background:#141416;border:1px solid #1f1f23;border-radius:9999px;padding:6px 12px;min-height:44px;transition:border-color 0.2s ease}.userFooter2:hover{border-color:#2e2e36}
 .userFooterLeft2{display:flex;align-items:center;gap:10px;min-width:0}
 .userFooterAvatar2{width:30px;height:30px;border-radius:50%;background:#27272a;display:grid;place-items:center;overflow:hidden;flex:none}
@@ -1863,7 +1893,7 @@ const dashCss = `
 .langFlag2{font-size:14px}
 .quickMenuBtn2{display:flex;align-items:center;justify-content:center;gap:8px;font-size:12px;font-weight:600;text-decoration:none;padding:8px;border-radius:8px;text-align:center;border:1px solid transparent;cursor:pointer;width:100%;transition:opacity 0.15s}
 .quickMenuBtn2:hover{opacity:0.9}
-.quickMenuBtn2.home{background:#1a1122;border-color:rgba(168,85,247,0.15);color:#f3e8ff}
+.quickMenuBtn2.home{background:#14223c;border-color:rgba(85,172,238,0.15);color:#dbeafe}
 .quickMenuBtn2.leaderboard{background:#22150a;border-color:rgba(245,158,11,0.15);color:#fef3c7}
 .quickMenuBtn2.discord{background:#0c1220;border-color:rgba(59,130,246,0.15);color:#dbeafe}
 .quickMenuBtn2.logout{background:#200b0d;border-color:rgba(239,68,68,0.15);color:#fee2e2;border:0}
@@ -1913,10 +1943,10 @@ const dashCss = `
 .stats4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
 .metric2{position:relative;background:#0c0c0e;border:1px solid #1f1f23;border-radius:12px;padding:20px;min-height:116px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 2px 10px rgba(0,0,0,0.1);transition:border-color 0.2s ease, transform 0.2s ease}
 .metric2:hover {
-  border-color: rgba(168, 85, 247, 0.3);
+  border-color: rgba(85, 172, 238, 0.3);
   transform: translateY(-2px);
 }
-.metricIcon2{position:absolute;right:18px;top:18px;color:#a855f7;background:rgba(168,85,247,0.1);width:32px;height:32px;display:grid;place-items:center;border-radius:8px}
+.metricIcon2{position:absolute;right:18px;top:18px;color:#55acee;background:rgba(85,172,238,0.1);width:32px;height:32px;display:grid;place-items:center;border-radius:8px}
 .metric2 strong{display:block;font-size:24px;font-weight:600;color:#f4f4f5;margin:8px 0 4px;letter-spacing:-0.02em}
 .metric2 b{display:block;font-size:13px;font-weight:500;color:#a1a1aa}
 .metric2 span{display:block;color:#71717a;font-size:12px;margin-top:6px;line-height:1.4}
@@ -1928,7 +1958,7 @@ const dashCss = `
 label{display:block;font-size:12px;font-weight:500;margin:0 0 6px;color:#a1a1aa}
 input,textarea,select{width:100%;min-height:42px;border-radius:8px;border:1px solid #1f1f23;background:#0c0c0e;color:#f4f4f5;padding:0 14px;outline:0;font:inherit;font-size:14px;transition:border-color 0.15s ease, box-shadow 0.15s ease}
 textarea{min-height:92px;padding:12px;resize:vertical}
-input:focus,textarea:focus,select:focus{border-color:#a855f7;box-shadow:0 0 0 3px rgba(168, 85, 247, 0.15)}
+input:focus,textarea:focus,select:focus{border-color:#55acee;box-shadow:0 0 0 3px rgba(85, 172, 238, 0.15)}
 input[type=range] {
   -webkit-appearance: none;
   appearance: none;

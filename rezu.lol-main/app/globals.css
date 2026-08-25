@@ -423,7 +423,7 @@ select {
   width: min(420px, 100%);
   transition: border-color 0.2s ease;
 }
-.claim-form:focus-within { border-color: #a855f7; box-shadow: 0 0 0 3px rgba(168,85,247,0.1); }
+.claim-form:focus-within { border-color: #55acee; box-shadow: 0 0 0 3px rgba(85,172,238,0.1); }
 .claim-prefix {
   color: var(--faint);
   padding-left: 10px;
@@ -445,22 +445,22 @@ select {
 .claim-btn {
   height: 36px !important;
   padding: 0 18px !important;
-  background: #a855f7 !important;
+  background: #55acee !important;
   border: none !important;
   flex: none;
 }
-.claim-btn:hover { background: #9333ea !important; }
+.claim-btn:hover { background: #3b8ec2 !important; }
 .claim-note {
   margin-top: 14px;
   font-size: 13px;
   color: var(--faint);
 }
 .claim-note a {
-  color: #a855f7;
+  color: #55acee;
   font-weight: 500;
   text-decoration: none;
 }
-.claim-note a:hover { color: #c084fc; text-decoration: underline; }
+.claim-note a:hover { color: #81c3f3; text-decoration: underline; }
 
 .land-actions {
   display: flex;

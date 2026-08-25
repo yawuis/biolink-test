@@ -32,6 +32,72 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
     fetch(`/api/view?username=${encodeURIComponent(profile.username)}`, { method: "POST" }).catch(() => {});
   }, [profile.username]);
 
+  // Coordinate parsing and line drawing for free-rearrange layout
+  const [coords, setCoords] = useState<Record<string, { x: number; y: number }>>({});
+  const mainCardRef = useRef<HTMLDivElement | null>(null);
+  const moduleRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [lines, setLines] = useState<{ id: string; x1: number; y1: number; x2: number; y2: number }[]>([]);
+
+  useEffect(() => {
+    const parsedCoords: Record<string, { x: number; y: number }> = {};
+    const modulesList = profile.modules || [];
+    let foundCoords = false;
+    modulesList.forEach((m: string) => {
+      if (m.includes(":")) {
+        const [key, val] = m.split(":");
+        const [xStr, yStr] = val.split(",");
+        parsedCoords[key] = { x: parseInt(xStr) || 0, y: parseInt(yStr) || 0 };
+        foundCoords = true;
+      }
+    });
+    if (foundCoords) {
+      setCoords(parsedCoords);
+    } else {
+      setCoords({});
+    }
+  }, [profile.modules]);
+
+  const updateLines = () => {
+    if (!mainCardRef.current) return;
+    const mainRect = mainCardRef.current.getBoundingClientRect();
+    const mainCenter = {
+      x: mainRect.left + mainRect.width / 2 + window.scrollX,
+      y: mainRect.top + mainRect.height / 2 + window.scrollY,
+    };
+
+    const newLines = Object.keys(coords).map((key) => {
+      const el = moduleRefs.current[key];
+      if (!el) return null;
+      const elRect = el.getBoundingClientRect();
+      const elCenter = {
+        x: elRect.left + elRect.width / 2 + window.scrollX,
+        y: elRect.top + elRect.height / 2 + window.scrollY,
+      };
+
+      return {
+        id: key,
+        x1: mainCenter.x,
+        y1: mainCenter.y,
+        x2: elCenter.x,
+        y2: elCenter.y,
+      };
+    }).filter(Boolean) as typeof lines;
+
+    setLines(newLines);
+  };
+
+  useEffect(() => {
+    if (Object.keys(coords).length > 0 && entered) {
+      updateLines();
+      window.addEventListener("resize", updateLines);
+      const timer = setTimeout(updateLines, 400);
+      return () => {
+        window.removeEventListener("resize", updateLines);
+        clearTimeout(timer);
+      };
+    }
+  }, [coords, entered]);
+
   const playTrack = (index: number, restart = false) => {
     const audio = audioRef.current;
     const track = tracks[index];
@@ -119,6 +185,57 @@ export default function ProfilePage({ profile }: { profile: Profile }) {
       <div style={{ position: "relative", zIndex: 0, minHeight: "100vh", background: "#09090b" }}>
         {profile.layout === "scroll" ? (
           <ScrollProfile profile={profile} />
+        ) : Object.keys(coords).length > 0 ? (
+          <div style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "100px 20px 40px",
+            boxSizing: "border-box",
+            position: "relative",
+          }}>
+            {/* SVG Connecting Lines */}
+            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", zIndex: 10 }}>
+              {lines.map((line) => (
+                <line
+                  key={line.id}
+                  x1={line.x1}
+                  y1={line.y1}
+                  x2={line.x2}
+                  y2={line.y2}
+                  stroke="#55acee"
+                  strokeWidth="1.5"
+                  strokeDasharray="5 5"
+                  opacity="0.35"
+                />
+              ))}
+            </svg>
+
+            {/* Centered Main Profile Info */}
+            <div ref={mainCardRef} style={{ zIndex: 20 }}>
+              <ProfileCard profile={{ ...profile, modules: [] }} />
+            </div>
+
+            {/* Absolutely Positioned Custom Floating Cards */}
+            {Object.keys(coords).map((m) => {
+              const pos = coords[m] || { x: 0, y: 0 };
+              const singleProfile = { ...profile, modules: [m] };
+              return (
+                <div
+                  key={m}
+                  ref={(el) => { moduleRefs.current[m] = el; }}
+                  style={{
+                    position: "absolute",
+                    transform: `translate(${pos.x}px, ${pos.y}px)`,
+                    zIndex: 25,
+                  }}
+                >
+                  <ProfileCard profile={singleProfile} />
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <ProfileCard profile={profile} />
         )}
