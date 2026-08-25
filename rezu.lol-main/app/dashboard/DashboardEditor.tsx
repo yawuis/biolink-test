@@ -126,6 +126,13 @@ export default function DashboardEditor({ initial, isOwner = false }: { initial:
   const [accountOpen, setAccountOpen] = useState(true);
   const [quickMenuOpen, setQuickMenuOpen] = useState(false);
 
+  const { roles, joined, loading: discordLoading } = useDashboardDiscordRoles(p);
+  const roleSet = useMemo(() => new Set(roles.map(String)), [roles]);
+  const roleOwner = roleSet.has(OWNER_ROLE_ID);
+  const rolePremium = roleSet.has("1541313066858319876");
+  const canUseAll = isOwner || roleOwner;
+  const isPremiumUser = canUseAll || rolePremium || p.owned_badges?.includes("premium");
+
   const update = (patch: Partial<Profile>) => setP((prev) => ({ ...prev, ...patch }));
   const profileAccent = p.accent || "#55acee";
   const publicUrl = typeof window === "undefined" ? `/${p.username}` : `${getBrowserPublicBaseUrl()}/${p.username}`;
@@ -504,7 +511,7 @@ const SEARCH_INDEX: SearchResult[] = [
         {tab === "customize" && (
           <div className="stack2">
             <Customize p={p} update={update} onUpload={onUpload} busy={busy} />
-            <LayoutTab p={p} update={update} />
+            <LayoutTab p={p} update={update} isPremium={isPremiumUser} />
             <MetadataTab p={p} update={update} onUpload={onUpload} busy={busy} />
           </div>
         )}
@@ -513,7 +520,7 @@ const SEARCH_INDEX: SearchResult[] = [
         {tab === "imagehost" && <ImageHostTab p={p} />}
         {tab === "settings" && <SettingsTab p={p} update={update} />}
         {tab === "analytics" && <Analytics p={p} />}
-        {tab === "badges" && <Badges p={p} update={update} isOwner={isOwner} />}
+        {tab === "badges" && <Badges p={p} update={update} isOwner={isOwner} roles={roles} joined={joined} loading={discordLoading} />}
         {tab === "templates" && <Templates p={p} update={update} onUpload={onUpload} busy={busy} />}
       </main>
     </div>
@@ -827,10 +834,9 @@ function LinksTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>)
   );
 }
 
-function LayoutTab({ p, update }: { p: Profile; update: (patch: Partial<Profile>) => void }) {
+function LayoutTab({ p, update, isPremium }: { p: Profile; update: (patch: Partial<Profile>) => void; isPremium: boolean }) {
   const modules = p.modules || [];
   const toggleMod = (key: string) => update({ modules: modules.includes(key) ? modules.filter((m) => m !== key) : [...modules, key] });
-  const isPremium = p.owned_badges?.includes("premium");
 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
@@ -1154,8 +1160,7 @@ function useDashboardDiscordRoles(profile: Profile) {
   return { roles, joined, loading };
 }
 
-function Badges({ p, update, isOwner }: { p: Profile; update: (patch: Partial<Profile>) => void; isOwner: boolean }) {
-  const { roles, joined, loading } = useDashboardDiscordRoles(p);
+function Badges({ p, update, isOwner, roles, joined, loading }: { p: Profile; update: (patch: Partial<Profile>) => void; isOwner: boolean; roles: string[]; joined: boolean; loading: boolean }) {
   const roleSet = new Set(roles.map(String));
   const roleOwner = roleSet.has(OWNER_ROLE_ID);
   const canUseAll = isOwner || roleOwner;
