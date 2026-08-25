@@ -20,6 +20,7 @@ import {
   SkillTags,
   StatsRow,
   useDiscordRoleBadges,
+  useDiscordData,
 } from "./profile-parts";
 import { SITE_NAME, type Profile } from "@/lib/constants";
 
@@ -136,8 +137,8 @@ export default function ProfileCard({
   onlyCard?: boolean;
   onlyModule?: string;
 }) {
-  const roleBadges = useDiscordRoleBadges(profile);
-  const badges = collectBadges(profile, roleBadges);
+  const { roleBadges, discordBadges } = useDiscordData(profile);
+  const badges = collectBadges(profile, roleBadges, discordBadges);
   const hasBg = /^https?:\/\//.test(profile.background_url || "");
   const bgUrl = profile.background_url || "";
   const isVideo = isVideoBackground(bgUrl);

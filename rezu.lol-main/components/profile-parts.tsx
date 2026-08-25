@@ -41,36 +41,91 @@ export function isVideoBackground(url?: string) {
   return /\.(mp4|webm|mov)(\?|#|$)/i.test(url || "");
 }
 
-export function useDiscordRoleBadges(profile: Profile) {
-  const [badges, setBadges] = useState<BadgeItem[]>([]);
+export function getDiscordBadgesFromFlags(flags: number): BadgeItem[] {
+  const list: BadgeItem[] = [];
+  const map: Record<number, { id: string; name: string; icon: string }> = {
+    1: { id: "ds_staff", name: "Discord Staff", icon: "🛡️" },
+    2: { id: "ds_partner", name: "Partnered Server Owner", icon: "🤝" },
+    4: { id: "ds_hypesquad", name: "HypeSquad Events", icon: "🎗️" },
+    8: { id: "ds_bug_hunter_1", name: "Bug Hunter Lvl 1", icon: "🐛" },
+    64: { id: "ds_bravery", name: "HypeSquad Bravery", icon: "💜" },
+    128: { id: "ds_brilliance", name: "HypeSquad Brilliance", icon: "💛" },
+    256: { id: "ds_balance", name: "HypeSquad Balance", icon: "💚" },
+    512: { id: "ds_early_supporter", name: "Early Nitro Supporter", icon: "👾" },
+    16384: { id: "ds_bug_hunter_2", name: "Bug Hunter Lvl 2", icon: "🪲" },
+    131072: { id: "ds_early_dev", name: "Early Bot Developer", icon: "🛠️" },
+    262144: { id: "ds_mod_alumni", name: "Mod Alumni", icon: "⚖️" },
+    4194304: { id: "ds_active_dev", name: "Active Developer", icon: "💻" },
+  };
+
+  Object.entries(map).forEach(([bit, badge]) => {
+    const bitNum = parseInt(bit);
+    if ((flags & bitNum) === bitNum) {
+      list.push(badge);
+    }
+  });
+  return list;
+}
+
+export interface DiscordData {
+  roleBadges: BadgeItem[];
+  discordBadges: BadgeItem[];
+  decorationUrl: string | null;
+}
+
+export function useDiscordData(profile: Profile): DiscordData {
+  const [data, setData] = useState<DiscordData>({
+    roleBadges: [],
+    discordBadges: [],
+    decorationUrl: null,
+  });
 
   useEffect(() => {
     if (!profile.discord_id) {
-      setBadges([]);
+      setData({ roleBadges: [], discordBadges: [], decorationUrl: null });
       return;
     }
     let alive = true;
-    async function loadBadges() {
+    async function load() {
       try {
         const res = await fetch(`/api/discord/presence/${profile.discord_id}`, { cache: "no-store" });
-        const data = await res.json();
+        const json = await res.json();
         if (!alive) return;
-        const roleIds = Array.isArray(data?.member?.roles) ? data.member.roles : Array.isArray(data?.roles) ? data.roles : [];
-        setBadges(badgesFromDiscordRoleIds(roleIds.map(String)));
+
+        if (json.ok) {
+          const roleIds = Array.isArray(json?.member?.roles) ? json.member.roles : Array.isArray(json?.roles) ? json.roles : [];
+          const roleBadges = badgesFromDiscordRoleIds(roleIds.map(String));
+
+          const flags = json?.user?.public_flags || 0;
+          const discordBadges = getDiscordBadgesFromFlags(flags);
+
+          let decorationUrl = null;
+          const deco = json?.user?.avatar_decoration_data;
+          if (deco?.asset) {
+            decorationUrl = `https://cdn.discordapp.com/avatar-decoration-presets/${deco.asset}.webp`;
+          }
+
+          setData({ roleBadges, discordBadges, decorationUrl });
+        }
       } catch {
-        if (alive) setBadges([]);
+        if (alive) setData({ roleBadges: [], discordBadges: [], decorationUrl: null });
       }
     }
-    loadBadges();
+    load();
     return () => {
       alive = false;
     };
   }, [profile.discord_id]);
 
-  return badges;
+  return data;
 }
 
-export function collectBadges(profile: Profile, roleBadges: BadgeItem[]) {
+export function useDiscordRoleBadges(profile: Profile) {
+  const data = useDiscordData(profile);
+  return data.roleBadges;
+}
+
+export function collectBadges(profile: Profile, roleBadges: BadgeItem[], discordBadges: BadgeItem[] = []) {
   const hiddenBadgeIds = new Set((profile.badges || []).filter((b) => b.enabled === false).map((b) => b.id));
   const customBadges = (profile.badges || []).filter((b) => b.id?.startsWith("custom-") && b.enabled !== false);
   const milestoneBadges = milestoneBadgesForProfile(profile).filter((badge) => !hiddenBadgeIds.has(badge.id));
@@ -84,7 +139,20 @@ export function collectBadges(profile: Profile, roleBadges: BadgeItem[]) {
       return meta ? { ...meta, enabled: true } : b;
     });
 
-  const allBadgesList = [...roleBadges, ...milestoneBadges, ...purchasedBadges, ...customBadges, ...explicitlyEnabledBadges];
+  const isPremium = roleBadges.some(b => b.id === "owner" || b.id === "premium") || 
+                    ownedBadgeIds.includes("premium");
+  
+  const showDiscordBadges = isPremium && !(profile.badges || []).some(b => b.id === "discord_badges" && b.enabled === false);
+  const activeDiscordBadges = showDiscordBadges ? discordBadges : [];
+
+  const allBadgesList = [
+    ...roleBadges, 
+    ...activeDiscordBadges, 
+    ...milestoneBadges, 
+    ...purchasedBadges, 
+    ...customBadges, 
+    ...explicitlyEnabledBadges
+  ];
   const seenIds = new Set<string>();
   const badges: BadgeItem[] = [];
   for (const b of allBadgesList) {
@@ -114,16 +182,33 @@ export function ProfileBanner({ profile, height }: { profile: Profile; height?: 
   );
 }
 
-export function AvatarBlock({ profile, size = 92 }: { profile: Profile; size?: number }) {
+export function AvatarBlock({ profile, size = 92, decorationUrl }: { profile: Profile; size?: number; decorationUrl?: string | null }) {
   const isImg = /^https?:\/\//.test(profile.avatar_url || "");
   return (
-    <div className="profile-avatar-wrap">
-      <div className="profile-avatar" style={{ width: size, height: size, fontSize: Math.round(size * 0.42), ...avatarShape(profile.avatar_shape) }}>
+    <div className="profile-avatar-wrap" style={{ position: "relative" }}>
+      <div className="profile-avatar" style={{ width: size, height: size, fontSize: Math.round(size * 0.42), ...avatarShape(profile.avatar_shape), position: "relative", overflow: "visible" }}>
         {isImg ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={profile.avatar_url} alt="" />
+          <img src={profile.avatar_url} alt="" style={{ width: "100%", height: "100%", borderRadius: "50%", objectFit: "cover", display: "block" }} />
         ) : (
           profile.avatar_url || "👤"
+        )}
+        {decorationUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={decorationUrl}
+            alt=""
+            style={{
+              position: "absolute",
+              top: "-8%",
+              left: "-8%",
+              width: "116%",
+              height: "116%",
+              maxWidth: "none",
+              pointerEvents: "none",
+              zIndex: 10,
+            }}
+          />
         )}
       </div>
     </div>

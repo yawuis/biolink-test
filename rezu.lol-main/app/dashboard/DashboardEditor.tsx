@@ -660,7 +660,7 @@ function Customize({ p, update, onUpload, busy, isPremium }: { p: Profile; updat
             <Field label="Display name" value={p.display_name || ""} onChange={(v) => update({ display_name: v })} />
             <Field label="Location" value={p.location || ""} onChange={(v) => update({ location: v })} />
 
-            <div className="discordFlow2 span2 gunDiscord2">
+            <div className="discordFlow2 span2 gunDiscord2" style={{ display: "grid", gap: 14 }}>
               <div className="gunInlineTitle2">
                 <div>
                   <strong>Discord Presence</strong>
@@ -668,6 +668,54 @@ function Customize({ p, update, onUpload, busy, isPremium }: { p: Profile; updat
                 </div>
                 <Toggle label="Enabled" checked={!!p.discord_enabled} onChange={(v) => update({ discord_enabled: v, discord_invite_url: DISCORD_INVITE_URL })} />
               </div>
+
+              {/* Discord Avatar Decoration Toggle (Premium) */}
+              <div className="gunInlineTitle2" style={{ borderTop: "1px solid #1f1f23", paddingTop: 12 }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <strong>Discord Avatar Decoration</strong>
+                    {!isPremium && <span style={{ fontSize: 9, fontWeight: 700, background: "rgba(85,172,238,0.15)", color: "#55acee", padding: "1px 6px", borderRadius: 9999, textTransform: "uppercase" }}>💎 Premium</span>}
+                  </div>
+                  <small>Equip your Discord avatar decoration on your profile avatar.</small>
+                </div>
+                <Toggle
+                  label="Show Decoration"
+                  checked={!!p.discord_avatar_decoration}
+                  onChange={(v) => {
+                    if (!isPremium) {
+                      alert("Discord Avatar Decorations are a premium-only feature!");
+                      return;
+                    }
+                    update({ discord_avatar_decoration: v });
+                  }}
+                />
+              </div>
+
+              {/* Discord Badges Toggle (Premium) */}
+              <div className="gunInlineTitle2" style={{ borderTop: "1px solid #1f1f23", paddingTop: 12 }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <strong>Discord Profile Badges</strong>
+                    {!isPremium && <span style={{ fontSize: 9, fontWeight: 700, background: "rgba(85,172,238,0.15)", color: "#55acee", padding: "1px 6px", borderRadius: 9999, textTransform: "uppercase" }}>💎 Premium</span>}
+                  </div>
+                  <small>Show your HypeSquad, Active Developer, and other Discord badges.</small>
+                </div>
+                <Toggle
+                  label="Show Badges"
+                  checked={!(p.badges || []).some(b => b.id === "discord_badges" && b.enabled === false)}
+                  onChange={(v) => {
+                    if (!isPremium) {
+                      alert("Discord Profile Badges are a premium-only feature!");
+                      return;
+                    }
+                    const cleanBadges = (p.badges || []).filter(b => b.id !== "discord_badges");
+                    update({
+                      badges: [...cleanBadges, { id: "discord_badges", name: "Discord Badges Toggle", icon: "", enabled: v }]
+                    });
+                  }}
+                />
+              </div>
+
               <div className="discordFlowActions2">
                 <div className="lockedInviteMini2">
                   <MessageCircle size={16} />

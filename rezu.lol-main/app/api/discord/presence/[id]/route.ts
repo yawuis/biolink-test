@@ -43,5 +43,27 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   }
 
   const data = await res.json().catch(() => ({ ok: false, error: "Bad bot response" }));
+
+  // If the bot returned successfully, let's fetch extended user details (avatar decoration, badges) from Discord
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+  if (data.ok && data.user && botToken) {
+    try {
+      const discordUserRes = await fetch(`https://discord.com/api/v10/users/${id}`, {
+        headers: {
+          Authorization: `Bot ${botToken}`,
+        },
+        next: { revalidate: 15 },
+      });
+      if (discordUserRes.ok) {
+        const discordUserData = await discordUserRes.json();
+        // Merge avatar decoration and public flags into the presence data user object
+        data.user.avatar_decoration_data = discordUserData.avatar_decoration_data;
+        data.user.public_flags = discordUserData.public_flags;
+      }
+    } catch (err) {
+      console.error("DEBUG: Failed to fetch extended Discord user details:", err);
+    }
+  }
+
   return NextResponse.json(data, { status: res.status });
 }
