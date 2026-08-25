@@ -221,3 +221,21 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/login");
 }
+
+export async function saveModules(modules: string[]) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not logged in" };
+
+  const { data: profile } = await supabase.from("profiles").select("username").eq("id", user.id).maybeSingle();
+  const username = profile?.username;
+
+  const { error } = await supabase.from("profiles").update({ modules }).eq("id", user.id);
+  if (error) return { error: error.message };
+
+  if (username) {
+    revalidatePath("/dashboard");
+    revalidatePath(`/${username}`);
+  }
+  return { ok: true };
+}

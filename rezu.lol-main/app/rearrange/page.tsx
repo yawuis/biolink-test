@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { type Profile, SITE_NAME } from "@/lib/constants";
 import ProfileCard from "@/components/ProfileCard";
 import { Save, X, Move } from "lucide-react";
+import { saveModules } from "@/app/dashboard/actions";
 
 export default function RearrangePage() {
   const router = useRouter();
@@ -140,17 +141,22 @@ export default function RearrangePage() {
       return key;
     });
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({ modules: updatedModules })
-      .eq("id", profile.id);
+    const res = await saveModules(updatedModules);
 
-    if (error) {
-      alert("Error saving: " + error.message);
+    if (res.error) {
+      alert("Error saving: " + res.error);
       setLoading(false);
     } else {
       router.push("/dashboard");
     }
+  };
+
+  const isModuleVisible = (m: string, p: Profile) => {
+    if (m === "discord") return !!p.discord_enabled || !!p.discord_id;
+    if (m === "github") return !!p.github_user;
+    if (m === "spotify") return !!p.spotify_url;
+    if (m === "clock") return true;
+    return false;
   };
 
   if (loading || !profile) {
@@ -161,7 +167,9 @@ export default function RearrangePage() {
     );
   }
 
-  const activeModules = (profile.modules || []).map((m) => (m.includes(":") ? m.split(":")[0] : m));
+  const activeModules = (profile.modules || [])
+    .map((m) => (m.includes(":") ? m.split(":")[0] : m))
+    .filter((m) => isModuleVisible(m, profile));
 
   return (
     <div style={{ minHeight: "100vh", position: "relative", overflow: "hidden", background: "#09090b" }}>
