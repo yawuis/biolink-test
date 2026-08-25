@@ -23,36 +23,87 @@ import {
 } from "./profile-parts";
 import { SITE_NAME, type Profile } from "@/lib/constants";
 
-function ModuleCards({ profile, cardStyle }: { profile: Profile; cardStyle?: React.CSSProperties }) {
+function ModuleCards({
+  profile,
+  cardStyle,
+  onRearrange,
+}: {
+  profile: Profile;
+  cardStyle?: React.CSSProperties;
+  onRearrange?: (modules: string[]) => void;
+}) {
   const modules = profile.modules || [];
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    if (!onRearrange) return;
+    e.dataTransfer.effectAllowed = "move";
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (!onRearrange || draggedIndex === null || draggedIndex === index) return;
+
+    const items = [...modules];
+    const draggedItem = items[draggedIndex];
+    items.splice(draggedIndex, 1);
+    items.splice(index, 0, draggedItem);
+
+    setDraggedIndex(index);
+    onRearrange(items);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
 
   return (
     <>
-      {modules.map((m) => {
+      {modules.map((m, idx) => {
+        const isDraggingThis = draggedIndex === idx;
+        const dragProps = onRearrange
+          ? {
+              draggable: true,
+              onDragStart: (e: React.DragEvent) => handleDragStart(e, idx),
+              onDragOver: (e: React.DragEvent) => handleDragOver(e, idx),
+              onDragEnd: handleDragEnd,
+              style: {
+                ...cardStyle,
+                cursor: "grab",
+                opacity: isDraggingThis ? 0.5 : 1,
+                border: isDraggingThis ? "1px dashed var(--accent, #a855f7)" : cardStyle?.border,
+                transition: "transform 0.15s, opacity 0.15s",
+              },
+            }
+          : {
+              style: cardStyle,
+            };
+
         if (m === "discord" && (!!profile.discord_enabled || !!profile.discord_id)) {
           return (
-            <article key="discord" className="profile-card no-banner" style={cardStyle}>
+            <article key="discord" className="profile-card no-banner" {...dragProps}>
               <DiscordCard profile={profile} />
             </article>
           );
         }
         if (m === "github" && !!profile.github_user) {
           return (
-            <article key="github" className="profile-card no-banner" style={cardStyle}>
+            <article key="github" className="profile-card no-banner" {...dragProps}>
               <GithubCard profile={profile} />
             </article>
           );
         }
         if (m === "spotify" && !!profile.spotify_url) {
           return (
-            <article key="spotify" className="profile-card no-banner" style={cardStyle}>
+            <article key="spotify" className="profile-card no-banner" {...dragProps}>
               <SpotifyCard profile={profile} />
             </article>
           );
         }
         if (m === "clock") {
           return (
-            <article key="clock" className="profile-card no-banner" style={cardStyle}>
+            <article key="clock" className="profile-card no-banner" {...dragProps}>
               <Clock profile={profile} />
             </article>
           );
@@ -73,7 +124,7 @@ function hasModules(profile: Profile) {
   );
 }
 
-export default function ProfileCard({ profile }: { profile: Profile }) {
+export default function ProfileCard({ profile, onRearrange }: { profile: Profile; onRearrange?: (modules: string[]) => void }) {
   const roleBadges = useDiscordRoleBadges(profile);
   const badges = collectBadges(profile, roleBadges);
   const hasBg = /^https?:\/\//.test(profile.background_url || "");
@@ -180,7 +231,7 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
           )}
         </article>
 
-        <ModuleCards profile={profile} cardStyle={cardStyle} />
+        <ModuleCards profile={profile} cardStyle={cardStyle} onRearrange={onRearrange} />
 
         <a href="/" className="profile-mark">
           {SITE_NAME.includes(".") ? (

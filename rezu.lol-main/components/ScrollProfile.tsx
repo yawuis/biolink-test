@@ -3,6 +3,6 @@
 import ProfileCard from "./ProfileCard";
 import { type Profile } from "@/lib/constants";
 
-export default function ScrollProfile({ profile }: { profile: Profile }) {
-  return <ProfileCard profile={profile} />;
+export default function ScrollProfile({ profile, onRearrange }: { profile: Profile; onRearrange?: (modules: string[]) => void }) {
+  return <ProfileCard profile={profile} onRearrange={onRearrange} />;
 }

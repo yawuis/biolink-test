@@ -507,10 +507,10 @@ const SEARCH_INDEX: SearchResult[] = [
           </select>
         </div>
 
-        {tab === "overview" && <Overview p={p} update={update} setTab={setTab} />}
+        {tab === "overview" && <Overview p={p} update={update} setTab={setTab} isPremium={isPremiumUser} />}
         {tab === "customize" && (
           <div className="stack2">
-            <Customize p={p} update={update} onUpload={onUpload} busy={busy} />
+            <Customize p={p} update={update} onUpload={onUpload} busy={busy} isPremium={isPremiumUser} />
             <LayoutTab p={p} update={update} isPremium={isPremiumUser} />
             <MetadataTab p={p} update={update} onUpload={onUpload} busy={busy} />
           </div>
@@ -527,7 +527,7 @@ const SEARCH_INDEX: SearchResult[] = [
   );
 }
 
-function Overview({ p, update, setTab }: { p: Profile; update: (patch: Partial<Profile>) => void; setTab: (tab: Tab) => void }) {
+function Overview({ p, update, setTab, isPremium }: { p: Profile; update: (patch: Partial<Profile>) => void; setTab: (tab: Tab) => void; isPremium: boolean }) {
   const completion = completionItems(p);
   const complete = completion.filter((item) => item.ok).length;
   const percent = Math.round((complete / completion.length) * 100);
@@ -571,7 +571,11 @@ function Overview({ p, update, setTab }: { p: Profile; update: (patch: Partial<P
         <section id="s-preview-ov" className="card2 previewCard2">
           <div className="cardHead2"><h2>Live preview</h2><p>This updates as you edit.</p></div>
           <div className="previewBox2">
-            {p.layout === "scroll" ? <ScrollProfile profile={p} /> : <ProfileCard profile={p} />}
+            {p.layout === "scroll" ? (
+              <ScrollProfile profile={p} onRearrange={isPremium ? (next) => update({ modules: next }) : undefined} />
+            ) : (
+              <ProfileCard profile={p} onRearrange={isPremium ? (next) => update({ modules: next }) : undefined} />
+            )}
           </div>
         </section>
       </div>
@@ -612,7 +616,7 @@ async function handleBackgroundUpload(file: File | undefined, p: Profile, update
   update({ audio_tracks: next, audio_url: next[0]?.url || url });
 }
 
-function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: Partial<Profile>) => void; onUpload: any; busy: string | null }) {
+function Customize({ p, update, onUpload, busy, isPremium }: { p: Profile; update: (patch: Partial<Profile>) => void; onUpload: any; busy: string | null; isPremium: boolean }) {
   const setBadgeColor = (value: string) => {
     if (!p.monochrome_icons) {
       const shouldEnable = window.confirm("Badge color works with Monochrome icons. Turn Monochrome icons on now?");
@@ -765,7 +769,11 @@ function Customize({ p, update, onUpload, busy }: { p: Profile; update: (patch: 
             <a href={`/${p.username}`} target="_blank" rel="noreferrer"><ExternalLink size={15} /></a>
           </div>
           <div className="customizePreviewViewport2">
-            {p.layout === "scroll" ? <ScrollProfile profile={p} /> : <ProfileCard profile={p} />}
+            {p.layout === "scroll" ? (
+              <ScrollProfile profile={p} onRearrange={isPremium ? (next) => update({ modules: next }) : undefined} />
+            ) : (
+              <ProfileCard profile={p} onRearrange={isPremium ? (next) => update({ modules: next }) : undefined} />
+            )}
           </div>
           <div className="customizePreviewFooter2">
             <span>/{p.username}</span>
