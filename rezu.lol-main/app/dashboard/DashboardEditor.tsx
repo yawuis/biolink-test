@@ -1677,7 +1677,8 @@ function completionItems(p: Profile) {
 
 const dashCss = `
 :root{--site-accent:#55acee;--site-accent-soft:rgba(85,172,238,.12)}
-.side2{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid #27272a;background:#0f0f11;display:flex;flex-direction:column;gap:16px}
+.dash2{min-height:100vh;background:#09090b;color:#f4f4f5;display:grid;grid-template-columns:250px minmax(0,1fr);font-family:Inter,system-ui,sans-serif}
+.side2{position:sticky;top:0;height:100vh;padding:24px 18px;border-right:1px solid #27272a;background:#0f0f11;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
 .brand2{display:flex;align-items:center;gap:10px;padding:0 4px;min-height:28px}
 .search2{display:flex;align-items:center;gap:10px;height:38px;border:1px solid #27272a;border-radius:8px;background:#18181b;padding:0 10px;color:#71717a;position:relative}.search2 input{background:transparent;border:0;outline:0;color:#f4f4f5;width:100%;font-size:13px}
 .searchDrop2{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:100;background:#141416;border:1px solid #27272a;border-radius:10px;overflow:hidden;display:grid;gap:0}
