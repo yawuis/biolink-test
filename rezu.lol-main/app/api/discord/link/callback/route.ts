@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return back(request, { error: "Log in to your sob.lol account first, then link Discord." });
+  if (!user) return back(request, { error: "Log in to your rezu.lol account first, then link Discord." });
 
   const { data: profile } = await supabase
     .from("profiles")

@@ -304,9 +304,11 @@ const SEARCH_INDEX: SearchResult[] = [
   return (
     <div className="dash2">
       <style>{dashCss}</style>
-
       <aside className="side2">
-        <div className="brand2">
+        <div className="brand2" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <span style={{ fontWeight: 800, fontSize: 18, color: "#fff", display: "flex", gap: 2, alignItems: "center", letterSpacing: "-0.02em" }}>
+            rezu<span style={{ color: "#55acee" }}>.lol</span>
+          </span>
           <BrandMark size={16} />
         </div>
 
@@ -332,87 +334,145 @@ const SEARCH_INDEX: SearchResult[] = [
         </div>
 
         <nav className="nav2">
-          {/* Account Dropdown */}
-          <div className="navGroup2">
-            <button 
-              type="button"
-              className={`navGroupHeader2 ${accountOpen ? "open" : ""}`} 
-              onClick={() => setAccountOpen(!accountOpen)}
-            >
-              <span className="navGroupHeaderLeft2">
-                <User size={17} />
-                <span>Account</span>
-              </span>
-              {accountOpen ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-            </button>
-            
-            {accountOpen && (
-              <div className="navGroupSub2">
-                {[
-                  { tab: "overview", label: "Overview" },
-                  { tab: "analytics", label: "Analytics" },
-                  { tab: "badges", label: "Badges" },
-                  { tab: "settings", label: "Settings" }
-                ].map((item) => (
-                  <button 
-                    key={item.tab} 
-                    type="button"
-                    className={`navSubItem2 ${tab === item.tab ? "active" : ""}`} 
-                    onClick={() => setTab(item.tab as Tab)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* Main Options */}
+          <div style={{ display: "grid", gap: 4 }}>
+            {[
+              { tab: "overview", label: "Overview", icon: Activity },
+              { tab: "customize", label: "Customize", icon: Brush },
+              { tab: "links", label: "Links", icon: LinkIcon },
+              { tab: "templates", label: "Templates", icon: Copy },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button 
+                  key={item.tab} 
+                  type="button"
+                  className={`navItem2 ${tab === item.tab ? "active" : ""}`} 
+                  onClick={() => setTab(item.tab as Tab)}
+                >
+                  <Icon size={16} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Other links */}
-          {[
-            { tab: "customize", label: "Customize", icon: Brush },
-            { tab: "links", label: "Links", icon: LinkIcon },
-            { tab: "premium", label: "Premium", icon: Gem },
-            { tab: "imagehost", label: "Image Host", icon: ImageIcon },
-            { tab: "templates", label: "Templates", icon: Copy }
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <button 
-                key={item.tab} 
-                type="button"
-                className={`navItem2 ${tab === item.tab ? "active" : ""}`} 
-                onClick={() => setTab(item.tab as Tab)}
-              >
-                <Icon size={17} />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+          {/* Tools & Performance */}
+          <div style={{ margin: "12px 0 6px 14px", fontSize: 10, fontWeight: 700, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Tools &amp; Stats
+          </div>
+          <div style={{ display: "grid", gap: 4 }}>
+            {[
+              { tab: "analytics", label: "Analytics", icon: BarChart3 },
+              { tab: "badges", label: "Badges & Roles", icon: BadgeCheck },
+              { tab: "imagehost", label: "Image Host", icon: ImageIcon },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <button 
+                  key={item.tab} 
+                  type="button"
+                  className={`navItem2 ${tab === item.tab ? "active" : ""}`} 
+                  onClick={() => setTab(item.tab as Tab)}
+                >
+                  <Icon size={16} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Account settings */}
+          <div style={{ margin: "12px 0 6px 14px", fontSize: 10, fontWeight: 700, color: "#71717a", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+            Account
+          </div>
+          <div style={{ display: "grid", gap: 4 }}>
+            {[
+              { tab: "settings", label: "Settings", icon: Settings },
+              { tab: "premium", label: "Premium Upgrade", icon: Gem, premium: true },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isPremiumItem = item.premium;
+              return (
+                <button 
+                  key={item.tab} 
+                  type="button"
+                  className={`navItem2 ${tab === item.tab ? "active" : ""}`} 
+                  style={isPremiumItem && tab !== item.tab ? {
+                    background: "rgba(85, 172, 238, 0.04)",
+                    color: "#55acee",
+                    border: "1px dashed rgba(85, 172, 238, 0.25)"
+                  } : undefined}
+                  onClick={() => setTab(item.tab as Tab)}
+                >
+                  <Icon size={16} style={isPremiumItem && tab !== item.tab ? { color: "#55acee" } : undefined} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        {/* Support Card */}
-        <div className="supportCard2">
-          <small>Have a question or need support?</small>
-          <a className="supportBtn2 primary" href={DISCORD_INVITE_URL} target="_blank" rel="noreferrer">
-            <HelpCircle size={15} /> Help Center
-          </a>
-          <small style={{ marginTop: 8 }}>Check out your page</small>
-          <a className="supportBtn2 secondary" href={`/${p.username}`} target="_blank" rel="noreferrer">
-            <ExternalLink size={15} /> My Page
-          </a>
+        {/* Rebranded Compact Support & Action Links Footer */}
+        <div style={{ marginTop: "auto", borderTop: "1px solid #1f1f23", paddingTop: 16, display: "grid", gap: 10 }}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <a 
+              href={DISCORD_INVITE_URL} 
+              target="_blank" 
+              rel="noreferrer" 
+              style={{ 
+                flex: 1, 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                gap: 6, 
+                height: 36, 
+                background: "#141416", 
+                border: "1px solid #1f1f23", 
+                borderRadius: 8, 
+                color: "#a1a1aa", 
+                fontSize: 12, 
+                fontWeight: 600, 
+                textDecoration: "none" 
+              }}
+            >
+              <HelpCircle size={14} /> Help Center
+            </a>
+            <a 
+              href={`/${p.username}`} 
+              target="_blank" 
+              rel="noreferrer" 
+              style={{ 
+                flex: 1, 
+                display: "flex", 
+                alignItems: "center", 
+                justifyContent: "center", 
+                gap: 6, 
+                height: 36, 
+                background: "#141416", 
+                border: "1px solid #1f1f23", 
+                borderRadius: 8, 
+                color: "#a1a1aa", 
+                fontSize: 12, 
+                fontWeight: 600, 
+                textDecoration: "none" 
+              }}
+            >
+              <ExternalLink size={14} /> My Page
+            </a>
+          </div>
+          <button 
+            type="button" 
+            className="shareProfileBtn2" 
+            style={{ height: 38, background: "#55acee", border: 0, borderRadius: 8, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, cursor: "pointer", fontWeight: 600, width: "100%" }}
+            onClick={() => {
+              navigator.clipboard?.writeText(publicUrl);
+              alert("Profile link copied to clipboard!");
+            }}
+          >
+            <Share2 size={14} /> Share Profile
+          </button>
         </div>
-
-        {/* Share profile Button */}
-        <button 
-          type="button"
-          className="shareProfileBtn2" 
-          onClick={() => {
-            navigator.clipboard?.writeText(publicUrl);
-            alert("Profile link copied to clipboard!");
-          }}
-        >
-          <Share2 size={15} /> Share Your Profile
-        </button>
 
         {/* User profile bar & Quick Menu trigger */}
         <div className="userFooter2" style={{ position: "relative" }}>
@@ -437,7 +497,7 @@ const SEARCH_INDEX: SearchResult[] = [
               <div className="quickMenu2">
                 <div className="quickMenuHeader2">
                   <h3>Quick Menu</h3>
-                  <p>Navigate quickly through sob.lol</p>
+                  <p>Navigate quickly through rezu.lol</p>
                 </div>
                 
                 <div className="quickMenuBody2">
