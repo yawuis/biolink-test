@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SiteHeader from "@/components/SiteHeader";
 import BrandMark from "@/components/BrandMark";
@@ -12,56 +12,64 @@ export const dynamic = "force-dynamic";
 function MockProfile() {
   return (
     <div className="land-preview">
-      {/* Animated gradient background â€” mirrors default profile look */}
+      {/* Animated gradient background — mirrors default profile look */}
       <div className="land-preview-bg" aria-hidden="true" />
 
-      <div className="land-preview-label">
+      <div className="land-preview-label" style={{ position: "relative", zIndex: 1 }}>
         <span>Preview</span>
         <span>{SITE_NAME}/pluto</span>
       </div>
 
-      {/* Glassmorphism card */}
-      <article className="profile-card no-banner has-modules land-preview-card">
-        <div className="profile-body">
-          <div className="profile-avatar-wrap">
-            <div className="profile-avatar" style={{ borderRadius: "50%" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://cdn.discordapp.com/avatars/1505623649007308954/7a945ed5242237ddecebf0bfb04c2329.webp?size=1024"
-                alt=""
-              />
+      <div style={{ display: "grid", gap: 10, position: "relative", zIndex: 1 }}>
+        {/* Main profile card */}
+        <article className="profile-card no-banner land-preview-card" style={{ width: "100%" }}>
+          <div className="profile-body">
+            <div className="profile-avatar-wrap">
+              <div className="profile-avatar" style={{ borderRadius: "50%" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://cdn.discordapp.com/avatars/1505623649007308954/7a945ed5242237ddecebf0bfb04c2329.webp?size=1024"
+                  alt=""
+                />
+              </div>
+            </div>
+            <h2 className="profile-name">pluto</h2>
+            <div className="profile-badges">
+              {[
+                { id: "owner", name: "Owner", icon: "👑" },
+                { id: "staff", name: "Developer", icon: "🛠️" },
+              ].map((badge) => (
+                <span key={badge.id} className="profile-badge badgeTipWrap" title={badge.name}>
+                  <BadgeIcon badge={badge} monochrome={false} size={16} />
+                  <span className="badgeTipBox">{badge.name}</span>
+                </span>
+              ))}
+            </div>
+            <div className="profile-meta">
+              <span className="profile-handle">@pluto</span>
+              <span className="profile-chip">he/him</span>
+            </div>
+            <p className="profile-bio">Designer. Builder. Mostly offline.</p>
+            <div className="profile-tags">
+              <span className="profile-tag">design</span>
+              <span className="profile-tag">music</span>
+              <span className="profile-tag">film</span>
+            </div>
+            <div className="profile-stats">
+              <span className="profile-stat"><Eye size={13} /> 2,418</span>
+              <span className="profile-stat"><Heart size={13} /> 186</span>
+              <span className="profile-stat">Joined Mar 2025</span>
             </div>
           </div>
-          <h2 className="profile-name">pluto</h2>
-          <div className="profile-badges">
-            {[
-              { id: "owner", name: "Owner", icon: "ðŸ‘‘" },
-              { id: "staff", name: "Developer", icon: "ðŸ› ï¸" },
-            ].map((badge) => (
-              <span key={badge.id} className="profile-badge badgeTipWrap" title={badge.name}>
-                <BadgeIcon badge={badge} monochrome={false} size={16} />
-                <span className="badgeTipBox">{badge.name}</span>
-              </span>
-            ))}
-          </div>
-          <div className="profile-meta">
-            <span className="profile-handle">@pluto</span>
-            <span className="profile-chip">he/him</span>
-          </div>
-          <p className="profile-bio">Designer. Builder. Mostly offline.</p>
-          <div className="profile-tags">
-            <span className="profile-tag">design</span>
-            <span className="profile-tag">music</span>
-            <span className="profile-tag">film</span>
-          </div>
-          <div className="profile-stats">
-            <span className="profile-stat"><Eye size={13} /> 2,418</span>
-            <span className="profile-stat"><Heart size={13} /> 186</span>
-            <span className="profile-stat">Joined Mar 2025</span>
-          </div>
-        </div>
-        <div className="profile-modules">
+        </article>
+
+        {/* Discord module card */}
+        <article className="profile-card no-banner land-preview-card" style={{ width: "100%" }}>
           <DiscordCard profile={{ discord_id: "1505623649007308954", discord_enabled: true } as any} />
+        </article>
+
+        {/* Clock module card */}
+        <article className="profile-card no-banner land-preview-card" style={{ width: "100%" }}>
           <div className="module-card">
             <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(9,9,11,0.6)", border: "1px solid rgba(255,255,255,0.08)", display: "grid", placeItems: "center", flex: "none" }}>
               <Clock size={18} style={{ color: "#a1a1aa" }} />
@@ -71,8 +79,8 @@ function MockProfile() {
               <div className="module-sub">Local time</div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </div>
     </div>
   );
 }

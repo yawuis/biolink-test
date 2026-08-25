@@ -23,7 +23,7 @@ import {
 } from "./profile-parts";
 import { SITE_NAME, type Profile } from "@/lib/constants";
 
-function ModuleCards({ profile }: { profile: Profile }) {
+function ModuleCards({ profile, cardStyle }: { profile: Profile; cardStyle?: React.CSSProperties }) {
   const modules = profile.modules || [];
   const showDiscord = modules.includes("discord") && (!!profile.discord_enabled || !!profile.discord_id);
   const showGithub = modules.includes("github") && !!profile.github_user;
@@ -32,12 +32,28 @@ function ModuleCards({ profile }: { profile: Profile }) {
   if (!showDiscord && !showGithub && !showSpotify && !showClock) return null;
 
   return (
-    <div className="profile-modules">
-      {showDiscord && <DiscordCard profile={profile} />}
-      {showGithub && <GithubCard profile={profile} />}
-      {showSpotify && <SpotifyCard profile={profile} />}
-      {showClock && <Clock profile={profile} />}
-    </div>
+    <>
+      {showDiscord && (
+        <article className="profile-card no-banner" style={cardStyle}>
+          <DiscordCard profile={profile} />
+        </article>
+      )}
+      {showGithub && (
+        <article className="profile-card no-banner" style={cardStyle}>
+          <GithubCard profile={profile} />
+        </article>
+      )}
+      {showSpotify && (
+        <article className="profile-card no-banner" style={cardStyle}>
+          <SpotifyCard profile={profile} />
+        </article>
+      )}
+      {showClock && (
+        <article className="profile-card no-banner" style={cardStyle}>
+          <Clock profile={profile} />
+        </article>
+      )}
+    </>
   );
 }
 
@@ -130,7 +146,6 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
             "profile-card",
             "no-banner",
             isCompact ? "is-compact" : "",
-            modulesOn ? "has-modules" : "",
           ].join(" ")}
           style={cardStyle}
         >
@@ -157,9 +172,9 @@ export default function ProfileCard({ profile }: { profile: Profile }) {
               />
             </div>
           )}
-
-          <ModuleCards profile={profile} />
         </article>
+
+        <ModuleCards profile={profile} cardStyle={cardStyle} />
 
         <a href="/" className="profile-mark">
           {SITE_NAME.includes(".") ? (
